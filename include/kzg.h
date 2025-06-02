@@ -20,13 +20,13 @@ public:
     // Setup phase
     void setup(size_t degree);
     
-    // Commitment phase
+    // Commitment phase - O(d)
     G1 commit(const Polynomial& poly);
     
-    // Witness creation
+    // Witness creation - O(d) [uses Polynomial::operator/ for optimal complexity]
     G1 create_witness(const Polynomial& poly, const Fr& point);
     
-    // Verification
+    // Verification - O(1)
     bool verify_eval(const G1& commitment, const Fr& point, const Fr& value, const G1& witness);
     
     // Batch opening

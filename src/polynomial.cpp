@@ -2,15 +2,18 @@
 #include <algorithm>
 #include <iostream>
 #include <cassert>
+#include <stdexcept>
 
 Polynomial::Polynomial(const std::vector<Fr>& coeffs) : coefficients(coeffs) {
-    // Remove leading zeros
-    while (coefficients.size() > 1 && coefficients.back().isZero()) {
-        coefficients.pop_back();
-    }
-    
+    remove_leading_zeros();
     if (coefficients.empty()) {
         coefficients.push_back(Fr(0));
+    }
+}
+
+void Polynomial::remove_leading_zeros() {
+    while (coefficients.size() > 1 && coefficients.back().isZero()) {
+        coefficients.pop_back();
     }
 }
 
@@ -41,10 +44,7 @@ Polynomial Polynomial::operator-(const Polynomial& other) const {
 }
 
 Polynomial Polynomial::operator*(const Polynomial& other) const {
-    if (coefficients.size() == 1 && coefficients[0].isZero()) {
-        return Polynomial({Fr(0)});
-    }
-    if (other.coefficients.size() == 1 && other.coefficients[0].isZero()) {
+    if (is_zero() || other.is_zero()) {
         return Polynomial({Fr(0)});
     }
     
@@ -85,16 +85,152 @@ Polynomial Polynomial::operator*(const Polynomial& other) const {
     return Polynomial(result);
 }
 
+// MAIN DIVISION OPERATOR - chooses optimal algorithm automatically
 Polynomial Polynomial::operator/(const Polynomial& divisor) const {
-    const auto& dividend_coeffs = coefficients;
-    const auto& divisor_coeffs = divisor.coefficients;
-    
-    if (divisor_coeffs.size() == 1 && divisor_coeffs[0].isZero()) {
+    if (divisor.is_zero()) {
         throw std::runtime_error("Division by zero polynomial");
     }
     
+    // Optimization: For linear divisors (x - a), use synthetic division - O(d)
+    if (divisor.coefficients.size() == 2 && divisor.coefficients[1] == Fr(1)) {
+        Fr root = -divisor.coefficients[0]; // divisor is (x - root)
+        return divide_by_linear_synthetic(root);
+    }
+    
+    // Fall back to general long division - O(d²)
+    return divide_general(divisor);
+}
+
+// O(d) synthetic division for (x - root)
+Polynomial Polynomial::divide_by_linear_synthetic(const Fr& root) const {
+    if (coefficients.size() <= 1) {
+        return Polynomial({Fr(0)});
+    }
+    
+    std::vector<Fr> quotient_coeffs(coefficients.size() - 1);
+    Fr accumulator = coefficients.back();
+    
+    for (int i = static_cast<int>(coefficients.size()) - 2; i >= 0; --i) {
+        quotient_coeffs[i] = accumulator;
+        accumulator = accumulator * root + coefficients[i];
+    }
+    
+    return Polynomial(quotient_coeffs);
+}
+
+// General polynomial division - O(d²)
+Polynomial Polynomial::divide_general(const Polynomial& divisor) const {
+    const auto& dividend_coeffs = coefficients;
+    const auto& divisor_coeffs = divisor.coefficients;
+    
     if (dividend_coeffs.size() < divisor_coeffs.size()) {
-        return Polynomial({Fr(0)}); // Quotient is zero
+        return Polynomial({Fr(0)}); // quotient is zero
+    }
+    
+    std::vector<Fr> quotient_coeffs(dividend_coeffs.size() - divisor_coeffs.size() + 1, Fr(0));
+    std::vector<Fr> remainder_coeffs = dividend_coeffs;
+    
+    Fr leading_coeff_inv;
+    Fr::inv(leading_coeff_inv, divisor_coeffs.back());
+    
+    for (int i = static_cast<int>(quotient_coeffs.size()) - 1; i >= 0; --i) {
+        if (remainder_coeffs.size() >= divisor_coeffs.size()) {
+            quotient_coeffs[i] = remainder_coeffs.back() * leading_coeff_inv;
+            
+            for (size_t j = 0; j < divisor_coeffs.size(); ++j) {
+                size_t remainder_idx = remainder_coeffs.size() - divisor_coeffs.size() + j;
+                remainder_coeffs[remainder_idx] -= quotient_coeffs[i] * divisor_coeffs[j];
+            }
+            
+            remainder_coeffs.pop_back();
+        }
+    }
+    
+    return Polynomial(quotient_coeffs);
+}
+
+// Create vanishing polynomial Z_H(x) = x^n - 1
+Polynomial Polynomial::vanishing_polynomial(size_t subgroup_size) {
+    std::vector<Fr> coeffs(subgroup_size + 1, Fr(0));
+    coeffs[0] = Fr(-1);           // -1
+    coeffs[subgroup_size] = Fr(1); // x^n
+    return Polynomial(coeffs);
+}
+
+// Create polynomial from roots ∏(x - root_i)
+Polynomial Polynomial::from_roots(const std::vector<Fr>& roots) {
+    Polynomial result({Fr(1)}); // Start with polynomial 1
+    
+    for (const Fr& root : roots) {
+        Polynomial linear_factor({-root, Fr(1)}); // (x - root)
+        result = result * linear_factor;
+    }
+    
+    return result;
+}
+
+std::pair<Polynomial, Polynomial> Polynomial::divmod(const Polynomial& divisor) const {
+    if (divisor.is_zero()) {
+        throw std::runtime_error("Division by zero polynomial");
+    }
+    
+    // Check for special cases first (optimizations)
+    if (divisor.degree() == 1 && divisor.coefficients[1] == Fr(1)) {
+        // Linear divisor (x - a) - use O(d) synthetic division
+        Fr root = -divisor.coefficients[0];
+        Polynomial quotient = divide_by_linear(root);
+        Fr remainder = evaluate(root);
+        return {quotient, Polynomial({remainder})};
+    }
+    
+    // Fall back to general long division
+    return long_division(divisor);
+}
+
+// O(d) synthetic division for (x - root)
+Polynomial Polynomial::divide_by_linear(const Fr& root) const {
+    if (coefficients.size() <= 1) {
+        return Polynomial({Fr(0)});
+    }
+    
+    std::vector<Fr> quotient_coeffs(coefficients.size() - 1);
+    Fr accumulator = coefficients.back();
+    
+    for (int i = static_cast<int>(coefficients.size()) - 2; i >= 0; --i) {
+        quotient_coeffs[i] = accumulator;
+        accumulator = accumulator * root + coefficients[i];
+    }
+    // Accumulator is now the remainder (should equal evaluate(root))
+    
+    return Polynomial(quotient_coeffs);
+}
+
+// Division by vanishing polynomial x^n - 1
+Polynomial Polynomial::divide_by_vanishing(size_t subgroup_size) const {
+    if (coefficients.size() <= subgroup_size) {
+        return Polynomial({Fr(0)});
+    }
+    
+    // For x^n - 1, the quotient has a simple structure
+    std::vector<Fr> quotient_coeffs(coefficients.size() - subgroup_size);
+    
+    for (size_t i = 0; i < quotient_coeffs.size(); ++i) {
+        quotient_coeffs[i] = coefficients[i + subgroup_size];
+        if (i < coefficients.size() - subgroup_size) {
+            quotient_coeffs[i] += coefficients[i]; // Add lower degree terms
+        }
+    }
+    
+    return Polynomial(quotient_coeffs);
+}
+
+// General polynomial long division - O(d²) but works for any divisor
+std::pair<Polynomial, Polynomial> Polynomial::long_division(const Polynomial& divisor) const {
+    const auto& dividend_coeffs = coefficients;
+    const auto& divisor_coeffs = divisor.coefficients;
+    
+    if (dividend_coeffs.size() < divisor_coeffs.size()) {
+        return {Polynomial({Fr(0)}), *this}; // quotient=0, remainder=dividend
     }
     
     std::vector<Fr> quotient_coeffs(dividend_coeffs.size() - divisor_coeffs.size() + 1, Fr(0));
@@ -119,7 +255,7 @@ Polynomial Polynomial::operator/(const Polynomial& divisor) const {
         }
     }
     
-    return Polynomial(quotient_coeffs);
+    return {Polynomial(quotient_coeffs), Polynomial(remainder_coeffs)};
 }
 
 Fr Polynomial::evaluate(const Fr& x) const {
@@ -183,6 +319,10 @@ size_t Polynomial::degree() const {
         return coefficients.empty() || coefficients[0].isZero() ? 0 : 0;
     }
     return coefficients.size() - 1;
+}
+
+bool Polynomial::is_zero() const {
+    return coefficients.size() == 1 && coefficients[0].isZero();
 }
 
 void Polynomial::resize(size_t new_size) {

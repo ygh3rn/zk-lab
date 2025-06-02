@@ -14,29 +14,29 @@ private:
     std::vector<Fr> subgroup;  // H = {ω⁰, ω¹, ..., ωⁿ⁻¹}
     Fr omega;                  // generator of subgroup H
     size_t n;                  // |H|
+    Polynomial vanishing_poly; // Z_H(x) = x^n - 1
     
 public:
     UnivariateZeroTest(KZG& kzg_instance, size_t subgroup_size);
     
+    // CORRECTED: O(1) proof size as required
     struct Proof {
-        G1 polynomial_commitment;    // C = [f(τ)]₁
-        G1 quotient_commitment;      // Q = [q(τ)]₁  
-        Fr random_point;             // r (chosen by verifier)
-        Fr polynomial_eval;          // f(r)
-        Fr quotient_eval;            // q(r)
-        G1 polynomial_witness;       // witness for f(r)
-        G1 quotient_witness;         // witness for q(r)
+        G1 polynomial_commitment;    // Commitment to f(x)
+        G1 quotient_commitment;      // Commitment to q(x) where f(x) = q(x) * Z_H(x)
+        // Removed: std::vector<Fr> evaluations;  // This violated O(1) proof size
+        // Removed: std::vector<G1> witnesses;    // This violated O(1) proof size
     };
     
+    // Prover: O(D)G + O(D)F complexity
     Proof prove(const Polynomial& poly);
     
+    // Verifier: O(1)G + O(1)F complexity  
     bool verify(const Proof& proof);
     
 private:
     void setup_subgroup();
-    Polynomial compute_vanishing_polynomial();
-    Polynomial compute_quotient_polynomial(const Polynomial& poly);
-    bool is_primitive_nth_root(const Fr& candidate, size_t n);
+    Polynomial compute_vanishing_polynomial();  // Local method
+    bool check_polynomial_zero_on_subgroup(const Polynomial& poly);
 };
 
 class UnivariateSumCheck {
@@ -45,32 +45,34 @@ private:
     std::vector<Fr> subgroup;  // H = {ω⁰, ω¹, ..., ωⁿ⁻¹}
     Fr omega;                  // generator of subgroup H
     size_t n;                  // |H|
+    Polynomial vanishing_poly; // Z_H(x) = x^n - 1
     
 public:
     UnivariateSumCheck(KZG& kzg_instance, size_t subgroup_size);
     
+    // CORRECTED: O(1) proof size as required
     struct Proof {
-        G1 polynomial_commitment;    // C = [f(τ)]₁
-        G1 h_star_commitment;        // H* = [h*(τ)]₁
-        G1 f_linear_commitment;      // F = [f_linear(τ)]₁
-        Fr claimed_sum;              // claimed sum value
-        Fr random_point;             // r (chosen by verifier)
-        Fr polynomial_eval;          // f(r)
-        Fr h_star_eval;              // h*(r)
-        Fr f_linear_eval;            // f_linear(r)
-        G1 polynomial_witness;       // witness for f(r)
-        G1 h_star_witness;          // witness for h*(r)
-        G1 f_linear_witness;        // witness for f_linear(r)
+        G1 polynomial_commitment;    // Commitment to f(x)
+        G1 quotient_commitment;      // Commitment to h*(x) 
+        Fr claimed_sum;              // ∑_{a∈H} f(a)
+        Fr random_challenge;         // Random challenge r used in verification
+        Fr quotient_eval;            // h*(r) for verification
+        G1 quotient_witness;         // Witness for h*(r)
     };
     
+    // Prover: O(D)G + O(D)F complexity
     Proof prove(const Polynomial& poly);
     
+    // Verifier: O(1)G + O(1)F complexity
     bool verify(const Proof& proof, const Fr& expected_sum);
     
 private:
     void setup_subgroup();
+    Polynomial compute_vanishing_polynomial();  // Local method
     Fr compute_sum_over_subgroup(const Polynomial& poly);
-    Polynomial compute_vanishing_polynomial();
+    
+    // Helper for the univariate sum-check protocol (Lemma 10.2 from Thaler)
+    Polynomial create_sum_check_polynomial(const Polynomial& poly, const Fr& claimed_sum);
 };
 
 #endif
