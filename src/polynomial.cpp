@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <iostream>
 #include <cassert>
-#include <stdexcept>
 
 Polynomial::Polynomial(const std::vector<Fr>& coeffs) : coefficients(coeffs) {
     // Remove leading zeros
@@ -86,29 +85,24 @@ Polynomial Polynomial::operator*(const Polynomial& other) const {
     return Polynomial(result);
 }
 
-Polynomial Polynomial::operator/(const Polynomial& other) const {
+Polynomial Polynomial::operator/(const Polynomial& divisor) const {
     const auto& dividend_coeffs = coefficients;
-    const auto& divisor_coeffs = other.coefficients;
+    const auto& divisor_coeffs = divisor.coefficients;
     
-    // Check for division by zero polynomial
     if (divisor_coeffs.size() == 1 && divisor_coeffs[0].isZero()) {
         throw std::runtime_error("Division by zero polynomial");
     }
     
-    // If dividend degree < divisor degree, quotient is zero
     if (dividend_coeffs.size() < divisor_coeffs.size()) {
-        return Polynomial({Fr(0)});
+        return Polynomial({Fr(0)}); // Quotient is zero
     }
     
-    // Initialize quotient coefficients
     std::vector<Fr> quotient_coeffs(dividend_coeffs.size() - divisor_coeffs.size() + 1, Fr(0));
     std::vector<Fr> remainder_coeffs = dividend_coeffs;
     
-    // Get inverse of leading coefficient of divisor
     Fr leading_coeff_inv;
     Fr::inv(leading_coeff_inv, divisor_coeffs.back());
     
-    // Perform polynomial long division
     for (int i = static_cast<int>(quotient_coeffs.size()) - 1; i >= 0; --i) {
         if (remainder_coeffs.size() >= divisor_coeffs.size()) {
             // Compute quotient coefficient
@@ -120,7 +114,7 @@ Polynomial Polynomial::operator/(const Polynomial& other) const {
                 remainder_coeffs[remainder_idx] -= quotient_coeffs[i] * divisor_coeffs[j];
             }
             
-            // Remove leading coefficient (should now be zero)
+            // Remove leading zero
             remainder_coeffs.pop_back();
         }
     }

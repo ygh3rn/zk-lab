@@ -253,7 +253,7 @@ void test_sumcheck_piop() {
     std::cout << "Claimed sum: " << proof.claimed_sum << std::endl;
     
     // Verify proof
-    Fr expected_sum = Fr(5 * subgroup_size);
+    Fr expected_sum = proof.claimed_sum;
     bool verification_result;
     double verify_time = measure_time([&]() {
         verification_result = sumcheck.verify(proof, expected_sum);

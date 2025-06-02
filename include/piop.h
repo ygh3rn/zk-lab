@@ -18,22 +18,29 @@ private:
 public:
     UnivariateZeroTest(KZG& kzg_instance, size_t subgroup_size);
     
-    // Prover functions
+    // OPTIMIZED: O(1) proof structure instead of O(n)
     struct Proof {
-        G1 polynomial_commitment;
-        G1 quotient_commitment;
-        std::vector<Fr> evaluations;
-        std::vector<G1> witnesses;
+        G1 polynomial_commitment;    // C = [f(τ)]₁
+        G1 quotient_commitment;      // Q = [q(τ)]₁  
+        Fr random_point;             // r (chosen by verifier)
+        Fr polynomial_eval;          // f(r)
+        Fr quotient_eval;            // q(r)
+        G1 polynomial_witness;       // witness for f(r)
+        G1 quotient_witness;         // witness for q(r)
+        // REMOVED: vector<Fr> evaluations, vector<G1> witnesses (was O(n))
     };
     
     Proof prove(const Polynomial& poly);
     
-    // Verifier functions
+    // OPTIMIZED: O(1) verifier instead of O(n)
     bool verify(const Proof& proof);
     
 private:
     void setup_subgroup();
     Polynomial compute_vanishing_polynomial();
+    Polynomial compute_quotient_polynomial(const Polynomial& poly);
+    // ADDED: Helper function for robust primitive root verification
+    bool is_primitive_nth_root(const Fr& candidate, size_t n);
 };
 
 class UnivariateSumCheck {
@@ -46,22 +53,31 @@ private:
 public:
     UnivariateSumCheck(KZG& kzg_instance, size_t subgroup_size);
     
-    // Prover functions
+    // OPTIMIZED: O(1) proof structure instead of O(n)
     struct Proof {
-        G1 polynomial_commitment;
-        G1 quotient_commitment;
-        Fr claimed_sum;
-        std::vector<G1> witnesses;
+        G1 polynomial_commitment;    // C = [f(τ)]₁
+        G1 h_star_commitment;        // H* = [h*(τ)]₁
+        G1 f_linear_commitment;      // F = [f_linear(τ)]₁
+        Fr claimed_sum;              // claimed sum value
+        Fr random_point;             // r (chosen by verifier)
+        Fr polynomial_eval;          // f(r)
+        Fr h_star_eval;              // h*(r)
+        Fr f_linear_eval;            // f_linear(r)
+        G1 polynomial_witness;       // witness for f(r)
+        G1 h_star_witness;          // witness for h*(r)
+        G1 f_linear_witness;        // witness for f_linear(r)
+        // REMOVED: vector<G1> witnesses (was O(n))
     };
     
     Proof prove(const Polynomial& poly);
     
-    // Verifier functions
+    // OPTIMIZED: O(1) verifier instead of O(n)
     bool verify(const Proof& proof, const Fr& expected_sum);
     
 private:
     void setup_subgroup();
     Fr compute_sum_over_subgroup(const Polynomial& poly);
+    Polynomial compute_vanishing_polynomial();
 };
 
 #endif

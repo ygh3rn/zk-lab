@@ -19,7 +19,7 @@ public:
     Polynomial operator+(const Polynomial& other) const;
     Polynomial operator-(const Polynomial& other) const;
     Polynomial operator*(const Polynomial& other) const;  // Using NTT
-    Polynomial operator/(const Polynomial& other) const;  // Polynomial division
+    Polynomial operator/(const Polynomial& divisor) const;
     
     // Evaluation
     Fr evaluate(const Fr& x) const;
