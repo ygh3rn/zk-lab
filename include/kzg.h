@@ -37,10 +37,6 @@ public:
     // Getters
     const std::vector<G1>& get_g1_powers() const { return g1_powers; }
     const std::vector<G2>& get_g2_powers() const { return g2_powers; }
-
-private:
-    // Helper function for polynomial division
-    Polynomial polynomial_division(const Polynomial& dividend, const Polynomial& divisor);
 };
 
 #endif

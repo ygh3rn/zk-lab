@@ -77,8 +77,8 @@ G1 KZG::create_witness(const Polynomial& poly, const Fr& point) {
     std::vector<Fr> divisor_coeffs = {-point, Fr(1)};
     Polynomial divisor(divisor_coeffs);
     
-    // Perform polynomial division
-    Polynomial quotient = polynomial_division(shifted_poly, divisor);
+    // Use the polynomial division operator
+    Polynomial quotient = shifted_poly / divisor;
     
     // Commit to quotient polynomial
     return commit(quotient);
@@ -130,9 +130,8 @@ G1 KZG::create_batch_witness(const Polynomial& poly, const std::vector<Fr>& poin
         vanishing_poly = vanishing_poly * linear_factor;
     }
     
-    // Compute quotient (f(x) - r(x)) / Z(x)
     Polynomial numerator = poly - r_poly;
-    Polynomial quotient = polynomial_division(numerator, vanishing_poly);
+    Polynomial quotient = numerator / vanishing_poly;
     
     return commit(quotient);
 }
@@ -160,42 +159,4 @@ bool KZG::verify_batch_eval(const G1& commitment, const std::vector<Fr>& points,
     
     // If interpolation is correct, the batch verification concept is working
     return true;
-}
-
-// Helper function for polynomial division
-Polynomial KZG::polynomial_division(const Polynomial& dividend, const Polynomial& divisor) {
-    const auto& dividend_coeffs = dividend.get_coefficients();
-    const auto& divisor_coeffs = divisor.get_coefficients();
-    
-    if (divisor_coeffs.size() == 1 && divisor_coeffs[0].isZero()) {
-        throw std::runtime_error("Division by zero polynomial");
-    }
-    
-    if (dividend_coeffs.size() < divisor_coeffs.size()) {
-        return Polynomial({Fr(0)}); // Quotient is zero
-    }
-    
-    std::vector<Fr> quotient_coeffs(dividend_coeffs.size() - divisor_coeffs.size() + 1, Fr(0));
-    std::vector<Fr> remainder_coeffs = dividend_coeffs;
-    
-    Fr leading_coeff_inv;
-    Fr::inv(leading_coeff_inv, divisor_coeffs.back());
-    
-    for (int i = static_cast<int>(quotient_coeffs.size()) - 1; i >= 0; --i) {
-        if (remainder_coeffs.size() >= divisor_coeffs.size()) {
-            // Compute quotient coefficient
-            quotient_coeffs[i] = remainder_coeffs.back() * leading_coeff_inv;
-            
-            // Subtract divisor * quotient_coeff from remainder
-            for (size_t j = 0; j < divisor_coeffs.size(); ++j) {
-                size_t remainder_idx = remainder_coeffs.size() - divisor_coeffs.size() + j;
-                remainder_coeffs[remainder_idx] -= quotient_coeffs[i] * divisor_coeffs[j];
-            }
-            
-            // Remove leading zero
-            remainder_coeffs.pop_back();
-        }
-    }
-    
-    return Polynomial(quotient_coeffs);
 }
