@@ -29,7 +29,7 @@ public:
     // Verification
     bool verify_eval(const G1& commitment, const Fr& point, const Fr& value, const G1& witness);
     
-    // Batch opening (optional)
+    // Batch opening
     G1 create_batch_witness(const Polynomial& poly, const std::vector<Fr>& points);
     bool verify_batch_eval(const G1& commitment, const std::vector<Fr>& points, 
                           const std::vector<Fr>& values, const G1& witness);

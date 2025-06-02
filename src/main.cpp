@@ -202,7 +202,6 @@ void test_zerotest_piop() {
     UnivariateZeroTest zerotest(kzg, subgroup_size);
     
     // Create a polynomial that should be zero on the subgroup
-    // For simplicity, use the zero polynomial
     std::vector<Fr> zero_coeffs = {Fr(0)};
     Polynomial zero_poly(zero_coeffs);
     

@@ -7,8 +7,6 @@ NTT::NTT(size_t size) : n(size) {
     // Ensure n is a power of 2
     assert((n & (n - 1)) == 0 && "Size must be a power of 2");
     
-    // MCL should already be initialized
-    
     // Find primitive n-th root of unity
     omega = find_primitive_root(n);
     
@@ -20,12 +18,9 @@ NTT::NTT(size_t size) : n(size) {
 }
 
 Fr NTT::find_primitive_root(size_t n) {
-    // For BN curves, we know that primitive roots exist
-    // Let's use a simpler approach to find them
-    
+    // For BN curves, we know that primitive roots exist 
     Fr candidate;
     
-    // Try different small candidates
     for (int i = 2; i < 100; ++i) {
         candidate = Fr(i);
         if (is_primitive_root(candidate, n)) {
@@ -42,7 +37,7 @@ Fr NTT::find_primitive_root(size_t n) {
     // Compute candidate^((field_order-1)/n)
     // We'll approximate this for the BN curve
     Fr exponent;
-    exponent = Fr(-1); // This gives us p-1 in the field
+    exponent = Fr(-1);
     exponent /= Fr(n);
     
     Fr::pow(candidate, candidate, exponent);

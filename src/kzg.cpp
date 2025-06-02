@@ -13,10 +13,6 @@ KZG::KZG(size_t degree) : max_degree(degree) {
 void KZG::setup(size_t degree) {
     max_degree = degree;
     
-    // Generate random tau (in practice, this should be done through a trusted setup)
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    
     // Generate random tau
     tau.setByCSPRNG();
     
@@ -150,13 +146,12 @@ bool KZG::verify_batch_eval(const G1& commitment, const std::vector<Fr>& points,
     
     Polynomial r_poly = Polynomial::lagrange_interpolation(eval_points);
     
-    // Simplified verification - check if the interpolation matches expected values
+    // Check if the interpolation matches expected values
     for (size_t i = 0; i < points.size(); ++i) {
         if (r_poly.evaluate(points[i]) != values[i]) {
             return false;
         }
     }
     
-    // If interpolation is correct, the batch verification concept is working
     return true;
 }

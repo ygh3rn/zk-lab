@@ -8,9 +8,9 @@ using namespace mcl::bn;
 
 class NTT {
 private:
-    Fr omega;           // primitive root of unity
-    Fr omega_inv;       // inverse of omega
-    size_t n;           // transform size (must be power of 2)
+    Fr omega;                   // primitive root of unity
+    Fr omega_inv;               // inverse of omega
+    size_t n;                   // transform size (must be power of 2)
     std::vector<Fr> powers;     // precomputed powers of omega
     std::vector<Fr> inv_powers; // precomputed powers of omega^(-1)
     
