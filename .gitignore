@@ -1,0 +1,17 @@
+# Build artifacts
+build/
+*.o
+*.so
+*.a
+
+# MCL library (too large for git)
+mcl/
+
+# Temporary files
+*~
+*.tmp
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
