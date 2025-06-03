@@ -8,8 +8,8 @@ KZG::SetupParams KZG::Setup(size_t max_degree) {
     SetupParams params;
     params.max_degree = max_degree;
     
-    // Generate random secret α (toxic waste)
-    secret_alpha.setByCSPRNG();
+    // Generate random secret 𝜏 (toxic waste)
+    secret_tao.setByCSPRNG();
     
     // Use the simplest possible approach - start with identity and handle manually
     G1 g1_generator;
@@ -52,7 +52,7 @@ KZG::Commitment KZG::Commit(const std::vector<Fr>& coefficients, const SetupPara
     Commitment commitment;
     commitment.commit.clear();  // Initialize to zero
     
-    // Compute C = Σ(coeff_i * g^(α^i))
+    // Compute C = Σ(coeff_i * g^(𝜏^i))
     for (size_t i = 0; i < coefficients.size(); i++) {
         G1 term;
         G1::mul(term, params.g1_powers[i], coefficients[i]);
