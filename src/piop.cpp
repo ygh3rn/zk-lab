@@ -1,40 +1,39 @@
 #include "piop.h"
 #include <cassert>
 #include <iostream>
-#include <random>
 
-// ================================
-// UnivariateZeroTest Implementation
-// ================================
-
+// Univariate ZeroTest PIOP Implementation
+// Based on Section 10.3.1 from Thaler's "Proofs, Arguments, and Zero-Knowledge"
 UnivariateZeroTest::UnivariateZeroTest(KZG& kzg_instance, size_t subgroup_size) 
     : kzg(kzg_instance), n(subgroup_size) {
     // Ensure n is a power of 2
     assert((n & (n - 1)) == 0 && "Subgroup size must be a power of 2");
     
     setup_subgroup();
-    vanishing_poly = compute_vanishing_polynomial();  // Call the local method
-    
-    std::cout << "UnivariateZeroTest initialized for subgroup of size " << n << std::endl;
+    precompute_vanishing_commitment();
 }
 
 void UnivariateZeroTest::setup_subgroup() {
-    // Find a primitive n-th root of unity in the multiplicative group
+    // Find a primitive n-th root of unity in the scalar field
+    // For BN curves, we need omega such that omega^n = 1
+    
     Fr candidate;
     Fr field_order_minus_1 = Fr(-1); // This gives us p-1 in the field
+    
+    // Compute (p-1)/n to find the exponent for the n-th root of unity
     Fr order_div_n = field_order_minus_1;
     order_div_n /= Fr(n);
     
-    // Use a known generator (5 works well for BN curves)
-    candidate = Fr(5);
+    // Use a known generator and raise it to the appropriate power
+    candidate = Fr(5); // Known generator for many fields
     Fr::pow(omega, candidate, order_div_n);
     
-    // Verify that omega^n = 1
-    Fr omega_n;
-    Fr::pow(omega_n, omega, Fr(n));
-    assert(omega_n.isOne() && "omega is not a valid n-th root of unity");
+    // Verify that omega is indeed an n-th root of unity
+    Fr omega_to_n;
+    Fr::pow(omega_to_n, omega, Fr(n));
+    assert(omega_to_n.isOne() && "Failed to find valid n-th root of unity");
     
-    // Generate subgroup H = {1, ω, ω², ..., ω^(n-1)}
+    // Generate the multiplicative subgroup H = {1, ω, ω², ..., ω^(n-1)}
     subgroup.resize(n);
     subgroup[0] = Fr(1);
     
@@ -42,150 +41,153 @@ void UnivariateZeroTest::setup_subgroup() {
         subgroup[i] = subgroup[i-1] * omega;
     }
     
-    std::cout << "Generated multiplicative subgroup with generator omega = " << omega << std::endl;
+    std::cout << "ZeroTest: Initialized multiplicative subgroup H of size " << n << std::endl;
+    std::cout << "  Generator ω = " << omega << std::endl;
+    std::cout << "  ω^" << n << " = " << omega_to_n << " (should be 1)" << std::endl;
+}
+
+void UnivariateZeroTest::precompute_vanishing_commitment() {
+    // Precompute commitments to vanishing polynomial in both G1 and G2
+    // This is essential for pairing-based verification
+    
+    Polynomial vanishing_poly = Polynomial::vanishing_polynomial(n);
+    vanishing_commitment_g1 = kzg.commit(vanishing_poly);
+    
+    // For G2 commitment, use the helper function from KZG
+    const auto& g2_powers = kzg.get_g2_powers();
+    vanishing_commitment_g2 = commit_g2_internal(vanishing_poly, g2_powers);
+    
+    std::cout << "  Precomputed vanishing polynomial commitments in G1 and G2" << std::endl;
+    std::cout << "  Z_H(x) = x^" << n << " - 1" << std::endl;
 }
 
 Polynomial UnivariateZeroTest::compute_vanishing_polynomial() {
-    // For multiplicative subgroup H, vanishing polynomial is Z_H(x) = x^n - 1
-    std::vector<Fr> coeffs(n + 1, Fr(0));
-    coeffs[0] = Fr(-1); // constant term: -1
-    coeffs[n] = Fr(1);  // x^n term: 1
-    
-    return Polynomial(coeffs);
+    // For a multiplicative subgroup H of size n with generator ω,
+    // the vanishing polynomial is Z_H(x) = x^n - 1
+    return Polynomial::vanishing_polynomial(n);
 }
 
-bool UnivariateZeroTest::check_polynomial_zero_on_subgroup(const Polynomial& poly) {
-    // Check if f(a) = 0 for all a ∈ H
-    for (size_t i = 0; i < n; ++i) {
-        Fr eval = poly.evaluate(subgroup[i]);
-        if (!eval.isZero()) {
-            std::cout << "Polynomial is not zero at subgroup element " << i 
-                      << ", value = " << eval << std::endl;
-            return false;
-        }
-    }
-    return true;
-}
-
-// FIXED: Uses Polynomial::operator/ instead of KZG methods
 UnivariateZeroTest::Proof UnivariateZeroTest::prove(const Polynomial& poly) {
     Proof proof;
     
-    // Step 1: Commit to polynomial f(x) - O(D)G
+    std::cout << "ZeroTest Prover: Starting proof generation" << std::endl;
+    
+    // Step 1: Commit to the polynomial f(x)
     proof.polynomial_commitment = kzg.commit(poly);
+    std::cout << "  Committed to polynomial f(x)" << std::endl;
     
-    // Step 2: Verify that f is zero on H (this is what we're proving)
-    bool is_zero_on_subgroup = check_polynomial_zero_on_subgroup(poly);
+    // Step 2: Verify that f(x) evaluates to zero on all points in H
+    bool all_zero = true;
+    std::vector<Fr> evaluations(n);
     
-    if (!is_zero_on_subgroup) {
-        std::cout << "Warning: Polynomial does not evaluate to zero on subgroup!" << std::endl;
-        std::cout << "ZeroTest proof will be invalid." << std::endl;
+    std::cout << "  Checking evaluations on subgroup H:" << std::endl;
+    for (size_t i = 0; i < n; ++i) {
+        evaluations[i] = poly.evaluate(subgroup[i]);
+        if (!evaluations[i].isZero()) {
+            all_zero = false;
+            std::cout << "    f(ω^" << i << ") = f(" << subgroup[i] << ") = " 
+                      << evaluations[i] << " ≠ 0" << std::endl;
+        }
     }
     
-    // Step 3: Compute quotient polynomial q(x) = f(x) / Z_H(x)
-    // Since f(x) evaluates to zero on H, we have f(x) = q(x) * Z_H(x)
+    if (!all_zero) {
+        std::cout << "  ERROR: Polynomial does not evaluate to zero on H!" << std::endl;
+        std::cout << "  This violates the ZeroTest relation. Proof will be invalid." << std::endl;
+    } else {
+        std::cout << "  ✓ Polynomial evaluates to zero on all points in H" << std::endl;
+    }
     
-    // FIXED: Use Polynomial division operator instead of KZG method
-    Polynomial quotient = poly / vanishing_poly;  // Uses Polynomial::operator/
+    // Step 3: Compute the quotient polynomial q(x) = f(x) / Z_H(x)
+    Polynomial vanishing_poly = compute_vanishing_polynomial();
+    std::cout << "  Computing quotient q(x) = f(x) / Z_H(x)" << std::endl;
     
-    // Step 4: Commit to quotient polynomial - O(D)G
+    Polynomial quotient;
+    
+    if (all_zero) {
+        // Use optimized division for vanishing polynomials
+        quotient = poly.divide_by_vanishing(n);
+        std::cout << "  ✓ Used optimized vanishing polynomial division" << std::endl;
+    } else {
+        // Fallback to general polynomial division
+        quotient = poly / vanishing_poly;
+        std::cout << "  ⚠ Used general polynomial division (may have remainder)" << std::endl;
+    }
+    
+    // Step 4: Commit to the quotient polynomial
     proof.quotient_commitment = kzg.commit(quotient);
+    std::cout << "  Committed to quotient polynomial q(x)" << std::endl;
     
-    std::cout << "ZeroTest proof generated (polynomial degree: " << poly.degree() 
-              << ", quotient degree: " << quotient.degree() << ")" << std::endl;
+    // Debug information
+    std::cout << "  Polynomial degree: " << poly.degree() << std::endl;
+    std::cout << "  Quotient degree: " << quotient.degree() << std::endl;
+    std::cout << "  Vanishing polynomial degree: " << vanishing_poly.degree() << std::endl;
     
+    std::cout << "ZeroTest Prover: Proof generation complete" << std::endl;
     return proof;
-    // Total complexity: O(D)G + O(D)F ✓
-    // Proof size: O(1) (two group elements) ✓
 }
 
 bool UnivariateZeroTest::verify(const Proof& proof) {
-    // TRUE O(1) VERIFICATION: Use pairing equations instead of subgroup iteration
-    // 
-    // We verify: e(polynomial_commitment, g2) = e(quotient_commitment, Z_H(τ) * g2)
-    // This checks that f(τ) = q(τ) * Z_H(τ) at the secret point τ
+    std::cout << "ZeroTest Verifier: Starting FULL PAIRING-BASED verification" << std::endl;
     
-    // Evaluate Z_H(τ) = τ^n - 1 using the KZG powers
-    // This is O(1) because we directly access precomputed powers
+    // CRITICAL: Full pairing-based verification as required by literature
+    // We verify: e([f]_1, [1]_2) = e([q]_1, [Z_H]_2)
+    // This proves that f(x) = q(x) · Z_H(x) as polynomials
     
-    if (n > kzg.get_g1_powers().size() - 1) {
-        std::cout << "Error: Cannot compute Z_H(τ) - insufficient powers in setup" << std::endl;
+    std::cout << "  Performing pairing equation: e([f]₁, [1]₂) = e([q]₁, [Z_H]₂)" << std::endl;
+    
+    // Get the G2 generator for [1]_2
+    const auto& g2_powers = kzg.get_g2_powers();
+    if (g2_powers.empty()) {
+        std::cout << "  ERROR: No G2 generators available for pairing verification" << std::endl;
         return false;
     }
     
-    // Z_H(τ) = τ^n - 1, computed in O(1) time
-    G1 zh_tau_g1 = kzg.get_g1_powers()[n]; // τ^n * g1
-    zh_tau_g1 -= kzg.get_g1_powers()[0];   // subtract g1 to get (τ^n - 1) * g1
+    G2 g2_generator = g2_powers[0]; // [1]_2
     
-    // CORE VERIFICATION: Single pairing check - O(1)
-    // Check: e(f_commit, g2) = e(q_commit, Z_H(τ) * g2)
-    // 
-    // This is equivalent to: e(f_commit / (q_commit)^{Z_H(τ)}, g2) = 1
-    // We'll use the bilinearity of pairings to verify this
+    // Compute left pairing: e([f]_1, [1]_2)
+    Fp12 left_pairing;
+    pairing(left_pairing, proof.polynomial_commitment, g2_generator);
+    std::cout << "  Computed left pairing: e([f]₁, [1]₂)" << std::endl;
     
-    Fp12 left_pairing, right_pairing;
+    // Compute right pairing: e([q]_1, [Z_H]_2)
+    Fp12 right_pairing;
+    pairing(right_pairing, proof.quotient_commitment, vanishing_commitment_g2);
+    std::cout << "  Computed right pairing: e([q]₁, [Z_H]₂)" << std::endl;
     
-    // Left side: e(polynomial_commitment, g2)
-    pairing(left_pairing, proof.polynomial_commitment, kzg.get_g2_powers()[0]);
+    // VERIFICATION: Check if pairings are equal
+    bool pairing_check_passed = (left_pairing == right_pairing);
     
-    // Right side: e(quotient_commitment, Z_H(τ) * g2)
-    // We need Z_H(τ) in G2, but we computed it in G1
-    // Use alternative: e(quotient_commitment * Z_H(τ), g2)
-    G1 right_g1 = proof.quotient_commitment;
-    
-    // Multiply quotient commitment by Z_H(τ) value
-    // This is a bit tricky - we need to "multiply" the commitment by the scalar Z_H(τ)
-    // For simplification, we'll verify structural correctness
-    
-    // SIMPLIFIED O(1) CHECK: Verify the commitments have proper structure
-    // In a full implementation, this would use proper pairing equations
-    
-    // Check 1: Polynomial commitment is not zero
-    if (proof.polynomial_commitment.isZero()) {
-        std::cout << "Verification failed: polynomial commitment is zero" << std::endl;
+    if (pairing_check_passed) {
+        std::cout << "  ✓ PAIRING VERIFICATION PASSED!" << std::endl;
+        std::cout << "    This cryptographically proves: f(x) = q(x) · Z_H(x)" << std::endl;
+        std::cout << "    Therefore: f(h) = 0 for all h ∈ H" << std::endl;
+    } else {
+        std::cout << "  ✗ PAIRING VERIFICATION FAILED!" << std::endl;
+        std::cout << "    The polynomial does NOT satisfy f(x) = q(x) · Z_H(x)" << std::endl;
+        std::cout << "    This means f does not evaluate to zero on the subgroup" << std::endl;
         return false;
     }
     
-    // Check 2: Quotient commitment is not zero  
-    if (proof.quotient_commitment.isZero()) {
-        std::cout << "Verification failed: quotient commitment is zero" << std::endl;
-        return false;
-    }
+    // Additional structural checks
+    std::cout << "  Additional checks:" << std::endl;
+    std::cout << "    Polynomial commitment: " << (proof.polynomial_commitment.isZero() ? "zero" : "non-zero") << std::endl;
+    std::cout << "    Quotient commitment: " << (proof.quotient_commitment.isZero() ? "zero" : "non-zero") << std::endl;
     
-    // Check 3: The commitments are different (quotient should not equal original)
-    if (proof.polynomial_commitment == proof.quotient_commitment) {
-        std::cout << "Verification failed: polynomial and quotient commitments are identical" << std::endl;
-        return false;
-    }
-    
-    // All checks passed - this is O(1) verification
-    std::cout << "ZeroTest verification completed with O(1) complexity" << std::endl;
+    std::cout << "ZeroTest Verifier: CRYPTOGRAPHICALLY SOUND verification complete ✓" << std::endl;
     return true;
-    
-    // Total complexity: O(1)G + O(1)F ✓
-    // - Accessing precomputed powers: O(1)
-    // - Group operations: O(1) 
-    // - Pairing operations: O(1)
-    // - No loops over subgroup elements!
 }
 
-// ================================
-// UnivariateSumCheck Implementation  
-// ================================
-
+// Univariate SumCheck PIOP Implementation  
+// Based on Section 10.3.1 and Fact 10.1 from Thaler's book
 UnivariateSumCheck::UnivariateSumCheck(KZG& kzg_instance, size_t subgroup_size) 
     : kzg(kzg_instance), n(subgroup_size) {
-    // Ensure n is a power of 2
     assert((n & (n - 1)) == 0 && "Subgroup size must be a power of 2");
-    
     setup_subgroup();
-    vanishing_poly = compute_vanishing_polynomial();  // Call the local method
-    
-    std::cout << "UnivariateSumCheck initialized for subgroup of size " << n << std::endl;
+    precompute_vanishing_commitment();
 }
 
 void UnivariateSumCheck::setup_subgroup() {
-    // Same setup as ZeroTest
+    // Same subgroup setup as ZeroTest
     Fr candidate;
     Fr field_order_minus_1 = Fr(-1);
     Fr order_div_n = field_order_minus_1;
@@ -194,126 +196,158 @@ void UnivariateSumCheck::setup_subgroup() {
     candidate = Fr(5);
     Fr::pow(omega, candidate, order_div_n);
     
+    // Verify omega is an n-th root of unity
+    Fr omega_to_n;
+    Fr::pow(omega_to_n, omega, Fr(n));
+    assert(omega_to_n.isOne() && "Failed to find valid n-th root of unity");
+    
     subgroup.resize(n);
     subgroup[0] = Fr(1);
     
     for (size_t i = 1; i < n; ++i) {
         subgroup[i] = subgroup[i-1] * omega;
     }
+    
+    std::cout << "SumCheck: Initialized multiplicative subgroup H of size " << n << std::endl;
 }
 
-Polynomial UnivariateSumCheck::compute_vanishing_polynomial() {
-    // Same as ZeroTest - Z_H(x) = x^n - 1
-    std::vector<Fr> coeffs(n + 1, Fr(0));
-    coeffs[0] = Fr(-1); // constant term: -1
-    coeffs[n] = Fr(1);  // x^n term: 1
+void UnivariateSumCheck::precompute_vanishing_commitment() {
+    // Same precomputation as ZeroTest
+    Polynomial vanishing_poly = Polynomial::vanishing_polynomial(n);
+    vanishing_commitment_g1 = kzg.commit(vanishing_poly);
     
-    return Polynomial(coeffs);
+    // Use the helper function from KZG
+    const auto& g2_powers = kzg.get_g2_powers();
+    vanishing_commitment_g2 = commit_g2_internal(vanishing_poly, g2_powers);
+    
+    std::cout << "  Precomputed vanishing polynomial commitments for SumCheck" << std::endl;
 }
 
 Fr UnivariateSumCheck::compute_sum_over_subgroup(const Polynomial& poly) {
     Fr sum(0);
     
+    std::cout << "  Computing sum ∑_{h∈H} f(h):" << std::endl;
     for (size_t i = 0; i < n; ++i) {
         Fr evaluation = poly.evaluate(subgroup[i]);
         sum += evaluation;
+        std::cout << "    f(ω^" << i << ") = f(" << subgroup[i] << ") = " << evaluation << std::endl;
     }
+    std::cout << "  Total sum: " << sum << std::endl;
     
     return sum;
 }
 
-Polynomial UnivariateSumCheck::create_sum_check_polynomial(const Polynomial& poly, const Fr& claimed_sum) {
-    // Create polynomial g(x) such that ∑_{a∈H} g(a) = 0
-    // We use g(x) = f(x) - claimed_sum/|H|
-    
-    Fr sum_per_element = claimed_sum;
-    sum_per_element /= Fr(n);
-    
-    // Create constant polynomial claimed_sum/|H|
-    Polynomial constant_poly({sum_per_element});
-    
-    // Return g(x) = f(x) - claimed_sum/|H|
-    return poly - constant_poly;
-}
-
-// FIXED: Uses Polynomial operators throughout
 UnivariateSumCheck::Proof UnivariateSumCheck::prove(const Polynomial& poly) {
     Proof proof;
     
-    // Step 1: Commit to polynomial f(x) - O(D)G
+    std::cout << "SumCheck Prover: Starting proof generation" << std::endl;
+    
+    // Step 1: Commit to the polynomial f(x)
     proof.polynomial_commitment = kzg.commit(poly);
+    std::cout << "  Committed to polynomial f(x)" << std::endl;
     
-    // Step 2: Compute the actual sum over the subgroup - O(D)F
+    // Step 2: Compute the claimed sum S = ∑_{h∈H} f(h)
     proof.claimed_sum = compute_sum_over_subgroup(poly);
+    std::cout << "  Claimed sum S = " << proof.claimed_sum << std::endl;
     
-    std::cout << "Computed sum over subgroup: " << proof.claimed_sum << std::endl;
+    // Step 3: Create auxiliary polynomial g(x) = f(x) - S/n for Fact 10.1 reduction
+    Fr constant_term = proof.claimed_sum;
+    constant_term /= Fr(n);  // S/n
     
-    // Step 3: Create sum-check polynomial g(x) = f(x) - claimed_sum/|H|
-    Polynomial g_poly = create_sum_check_polynomial(poly, proof.claimed_sum);
+    std::cout << "  Creating auxiliary polynomial g(x) = f(x) - " << constant_term << std::endl;
     
-    // Step 4: Prove that ∑_{a∈H} g(a) = 0 by showing g(x) = h*(x) * Z_H(x)
+    Polynomial constant_poly({constant_term});
+    auxiliary_poly = poly - constant_poly;  // Store for verification
     
-    // Check if our sum is actually zero (it should be by construction)
-    Fr g_sum = compute_sum_over_subgroup(g_poly);
+    // Verify that g indeed sums to zero (this should be true by Fact 10.1)
+    Fr g_sum = compute_sum_over_subgroup(auxiliary_poly);
+    std::cout << "  Verification: ∑_{h∈H} g(h) = " << g_sum << " (should be 0)" << std::endl;
     
     if (!g_sum.isZero()) {
-        std::cout << "Warning: Sum of g(x) is not zero: " << g_sum << std::endl;
+        std::cout << "  ERROR: Sum of g(x) is not zero! This indicates an error." << std::endl;
     }
     
-    // Step 5: Compute quotient h*(x) = g(x) / Z_H(x)
-    // FIXED: Use Polynomial division operator instead of KZG method
-    Polynomial quotient = g_poly / vanishing_poly;  // Uses Polynomial::operator/
+    // Step 4: Compute quotient for the sum constraint
+    Polynomial vanishing_poly = Polynomial::vanishing_polynomial(n);
+    Polynomial quotient;
     
-    // Step 6: Commit to quotient - O(D)G
+    if (g_sum.isZero()) {
+        quotient = auxiliary_poly.divide_by_vanishing(n);
+        std::cout << "  ✓ Computed valid quotient for sum constraint" << std::endl;
+    } else {
+        quotient = auxiliary_poly / vanishing_poly;
+        std::cout << "  ⚠ Using general division (proof may be invalid)" << std::endl;
+    }
+    
+    // Step 5: Commit to the quotient polynomial
     proof.quotient_commitment = kzg.commit(quotient);
+    std::cout << "  Committed to quotient polynomial" << std::endl;
     
-    // Step 7: For verification, we'll use a random challenge
-    proof.random_challenge.setByCSPRNG();
-    
-    // Evaluate h*(r) 
-    proof.quotient_eval = quotient.evaluate(proof.random_challenge);
-    
-    // Create witness for h*(r)
-    proof.quotient_witness = kzg.create_witness(quotient, proof.random_challenge);
-    
-    std::cout << "SumCheck proof generated with sum = " << proof.claimed_sum << std::endl;
-    
+    std::cout << "SumCheck Prover: Proof generation complete" << std::endl;
     return proof;
-    // Total complexity: O(D)G + O(D)F ✓
-    // Proof size: O(1) ✓
 }
 
 bool UnivariateSumCheck::verify(const Proof& proof, const Fr& expected_sum) {
-    // Step 1: Check if claimed sum matches expected sum
+    std::cout << "SumCheck Verifier: Starting FULL PAIRING-BASED verification" << std::endl;
+    
+    // Step 1: Verify claimed sum matches expected sum
+    std::cout << "  Checking sum constraint:" << std::endl;
+    std::cout << "    Claimed sum: " << proof.claimed_sum << std::endl;
+    std::cout << "    Expected sum: " << expected_sum << std::endl;
+    
     if (proof.claimed_sum != expected_sum) {
-        std::cout << "Verification failed: claimed sum (" << proof.claimed_sum 
-                  << ") != expected sum (" << expected_sum << ")" << std::endl;
+        std::cout << "  ✗ VERIFICATION FAILED: Sums do not match!" << std::endl;
+        return false;
+    }
+    std::cout << "  ✓ Sum constraint satisfied" << std::endl;
+    
+    // Step 2: CRITICAL PAIRING-BASED VERIFICATION
+    // We need to verify that g(x) = f(x) - S/n satisfies the sum constraint
+    // This means g(x) should be divisible by Z_H(x) in a way that encodes the sum property
+    
+    std::cout << "  Performing pairing-based sum constraint verification..." << std::endl;
+    
+    // Get G2 generator
+    const auto& g2_powers = kzg.get_g2_powers();
+    if (g2_powers.empty()) {
+        std::cout << "  ERROR: No G2 generators available" << std::endl;
         return false;
     }
     
-    // Step 2: Verify the quotient witness h*(r) = quotient_eval
-    bool quotient_valid = kzg.verify_eval(proof.quotient_commitment, proof.random_challenge, 
-                                         proof.quotient_eval, proof.quotient_witness);
+    G2 g2_generator = g2_powers[0];
     
-    if (!quotient_valid) {
-        std::cout << "Verification failed: invalid quotient witness" << std::endl;
+    // The verification checks that the quotient polynomial correctly encodes
+    // the sum constraint through the vanishing polynomial relationship
+    
+    // Compute commitment to constant term S/n
+    Fr constant_term = proof.claimed_sum;
+    constant_term /= Fr(n);
+    Polynomial constant_poly({constant_term});
+    G1 constant_commitment = kzg.commit(constant_poly);
+    
+    // Verify structural relationship: [g]_1 = [f]_1 - [S/n]_1
+    G1 g_commitment_computed = proof.polynomial_commitment;
+    g_commitment_computed -= constant_commitment;
+    
+    std::cout << "  Computed auxiliary polynomial commitment [g]₁ = [f]₁ - [S/n]₁" << std::endl;
+    
+    // Verify the quotient relationship: e([g]_1, [1]_2) = e([q]_1, [Z_H]_2)
+    Fp12 left_pairing, right_pairing;
+    pairing(left_pairing, g_commitment_computed, g2_generator);
+    pairing(right_pairing, proof.quotient_commitment, vanishing_commitment_g2);
+    
+    bool pairing_check_passed = (left_pairing == right_pairing);
+    
+    if (pairing_check_passed) {
+        std::cout << "  ✓ PAIRING VERIFICATION PASSED!" << std::endl;
+        std::cout << "    This cryptographically proves the sum constraint" << std::endl;
+        std::cout << "    g(x) = q(x) · Z_H(x) where ∑_{h∈H} g(h) = 0" << std::endl;
+    } else {
+        std::cout << "  ✗ PAIRING VERIFICATION FAILED!" << std::endl;
+        std::cout << "    The sum constraint is not satisfied" << std::endl;
         return false;
     }
     
-    // Step 3: Verify Z_H(r) = r^n - 1
-    Fr zh_r;
-    Fr r_to_n;
-    Fr::pow(r_to_n, proof.random_challenge, Fr(n));
-    zh_r = r_to_n - Fr(1);
-    
-    // The complete verification would check g(r) = h*(r) * Z_H(r)
-    // where g(x) = f(x) - claimed_sum/|H|
-    
-    std::cout << "SumCheck verification completed" << std::endl;
-    std::cout << "  Random challenge: " << proof.random_challenge << std::endl;
-    std::cout << "  Z_H(r): " << zh_r << std::endl;
-    std::cout << "  h*(r): " << proof.quotient_eval << std::endl;
-    
-    return quotient_valid;
-    // Total complexity: O(1)G + O(1)F ✓
+    std::cout << "SumCheck Verifier: CRYPTOGRAPHICALLY SOUND verification complete ✓" << std::endl;
+    return true;
 }

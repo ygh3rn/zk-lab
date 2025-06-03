@@ -202,6 +202,7 @@ void test_zerotest_piop() {
     UnivariateZeroTest zerotest(kzg, subgroup_size);
     
     // Create a polynomial that should be zero on the subgroup
+    // For simplicity, use the zero polynomial
     std::vector<Fr> zero_coeffs = {Fr(0)};
     Polynomial zero_poly(zero_coeffs);
     
@@ -252,7 +253,7 @@ void test_sumcheck_piop() {
     std::cout << "Claimed sum: " << proof.claimed_sum << std::endl;
     
     // Verify proof
-    Fr expected_sum = proof.claimed_sum;
+    Fr expected_sum = Fr(5 * subgroup_size);
     bool verification_result;
     double verify_time = measure_time([&]() {
         verification_result = sumcheck.verify(proof, expected_sum);
@@ -302,6 +303,8 @@ void run_performance_benchmarks() {
             
             double commit_time = measure_time([&]() {
                 G1 commitment = kzg.commit(poly);
+                // Use the commitment to avoid warning
+                (void)commitment;
             });
             
             Fr point;
@@ -311,11 +314,15 @@ void run_performance_benchmarks() {
             G1 commitment = kzg.commit(poly);
             double witness_time = measure_time([&]() {
                 G1 witness = kzg.create_witness(poly, point);
+                // Use the witness to avoid warning
+                (void)witness;
             });
             
             G1 witness = kzg.create_witness(poly, point);
             double verify_time = measure_time([&]() {
                 bool result = kzg.verify_eval(commitment, point, value, witness);
+                // Use the result to avoid warning
+                (void)result;
             });
             
             std::cout << "  KZG commit time: " << commit_time << " ms" << std::endl;
