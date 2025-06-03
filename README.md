@@ -1,169 +1,153 @@
 # Cryptography Programming Practice
 
-This repository contains implementations of cryptographic protocols including NTT, KZG commitments, and PIOPs using the MCL library.
+Complete implementation of cryptographic protocols including NTT, KZG commitments, and polynomial IOPs.
 
-## 📋 Requirements
-
-- C++17 compatible compiler (g++ or clang++)
-- MCL library (https://github.com/herumi/mcl)
-- GMP library
-- OpenSSL (for random number generation)
-
-## 🛠️ Installation
-
-### Installing MCL Library
-
-```bash
-# Clone MCL repository
-git clone https://github.com/herumi/mcl
-cd mcl
-
-# Build and install
-make -j4
-sudo make install
-```
-
-### Building the Project
-
-```bash
-# Clone this repository
-cd crypto-practice
-
-# Build all components
-make all
-
-# Or build individual components
-make test_ntt    # NTT tests only
-make test_kzg    # KZG tests only
-make test_piop   # PIOP tests only
-```
-
-## 🚀 Running Tests
-
-### Run All Tests
-```bash
-make test
-# or
-./test_all
-```
-
-### Run Individual Test Suites
-```bash
-./test_ntt    # Test NTT implementation
-./test_kzg    # Test KZG protocol
-./test_piop   # Test ZeroTest and SumCheck PIOPs
-```
-
-## 📁 Project Structure
+## Project Structure
 
 ```
-crypto-practice/
-├── crypto_practice.hpp    # Main header file with declarations
-├── ntt.cpp               # NTT implementation
-├── polynomial_ops.cpp    # Polynomial operations
-├── kzg.cpp              # KZG commitment scheme
-├── zerotest.cpp         # ZeroTest PIOP
-├── sumcheck.cpp         # SumCheck PIOP
-├── test_ntt.cpp         # NTT test suite
-├── test_kzg.cpp         # KZG test suite
-├── test_piop.cpp        # PIOP test suite
-├── test_all.cpp         # Main test runner
-├── Makefile             # Build configuration
+cryptography_practice/
+├── kzg.h                 # KZG protocol header
+├── kzg.cpp              # KZG implementation
+├── protocol.cpp         # Main implementation with NTT and PIOPs
+├── CMakeLists.txt       # Build configuration
 └── README.md            # This file
 ```
 
-## 📊 Implemented Features
+## Features Implemented
 
-### 1. **NTT (Number Theoretic Transform)**
-- Non-recursive Cooley-Tukey algorithm
-- Inverse NTT
-- Polynomial interpolation
+### 1. Number Theoretic Transform (NTT)
+- Non-recursive NTT and inverse NTT
+- Polynomial interpolation using inverse NTT
 - Time complexity: O(n log n)
 
-### 2. **Polynomial Operations**
-- Multiplication using NTT
-- Evaluation using Horner's method
-- Division with remainder
-- Time complexity: O(n log n) for multiplication
+### 2. Polynomial Operations
+- Polynomial multiplication using NTT
+- Efficient polynomial division
+- Polynomial evaluation using Horner's method
 
-### 3. **KZG Commitment Scheme**
-- Setup with trusted parameters
-- Polynomial commitment
-- Witness creation for evaluations
-- Pairing-based verification
-- Prover time: O(D) group operations
-- Verifier time: O(1) pairings
+### 3. KZG Polynomial Commitment Scheme
+- **Setup**: Generates structured reference string
+- **Commit**: Creates polynomial commitments
+- **CreateWitness**: Generates evaluation proofs
+- **VerifyEval**: Verifies evaluation proofs using pairings
 
-### 4. **ZeroTest PIOP**
-- Proves polynomial evaluates to zero on a subgroup
-- Uses quotient polynomial technique
-- Constant proof size
-- Prover: O(D) operations
-- Verifier: O(1) operations
+### 4. Univariate ZeroTest PIOP
+Proves that a polynomial evaluates to zero on all points of a subgroup.
+- **Prover time**: O(D)𝔾 + O(D)𝔽
+- **Verifier time**: O(1)𝔾 + O(1)𝔽
+- **Proof size**: O(1)
 
-### 5. **SumCheck PIOP**
-- Proves sum of evaluations equals zero
-- Constant proof size
-- Prover: O(D) operations
-- Verifier: O(1) operations
+### 5. Univariate SumCheck PIOP
+Proves that the sum of polynomial evaluations on a subgroup equals zero.
+- **Prover time**: O(D)𝔾 + O(D)𝔽
+- **Verifier time**: O(1)𝔾 + O(1)𝔽
+- **Proof size**: O(1)
 
-## 🧪 Testing
+## Dependencies
 
-Each component includes comprehensive tests:
+### MCL Library
+Install the MCL cryptographic library:
 
-- **Correctness tests**: Verify mathematical properties
-- **Edge cases**: Test with zero polynomials, constant polynomials
-- **Random tests**: Use randomly generated inputs
-- **Performance benchmarks**: Measure time complexity
-
-## ⚡ Performance
-
-The implementation achieves the required time complexities:
-
-| Operation | Time Complexity | Space Complexity |
-|-----------|----------------|------------------|
-| NTT | O(n log n) | O(n) |
-| Polynomial Multiply | O(n log n) | O(n) |
-| KZG Commit | O(D) | O(1) |
-| KZG Verify | O(1) | O(1) |
-| PIOP Prove | O(D) | O(D) |
-| PIOP Verify | O(1) | O(1) |
-
-## 🔧 Troubleshooting
-
-### MCL Library Not Found
 ```bash
-export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-export CPLUS_INCLUDE_PATH=/usr/local/include:$CPLUS_INCLUDE_PATH
+# Clone and build MCL
+git clone https://github.com/herumi/mcl.git
+cd mcl
+make -j$(nproc)
+sudo make install
 ```
 
-### Compilation Errors
-Ensure you have C++17 support:
+### System Requirements
+- C++17 compiler (GCC 7+ or Clang 6+)
+- CMake 3.12+
+- Linux/macOS (Windows with WSL)
+
+## Compilation
+
 ```bash
-g++ --version  # Should be 7.0 or higher
+# Create build directory
+mkdir build && cd build
+
+# Configure with CMake
+cmake ..
+
+# Build the project
+make -j$(nproc)
+
+# Run the implementation
+./cryptography_practice
 ```
 
-## 📚 References
+## Usage
 
-1. KZG Paper: [Constant-Size Commitments to Polynomials and Their Applications](https://www.iacr.org/archive/asiacrypt2010/6477178/6477178.pdf)
-2. MCL Library: [Documentation](https://github.com/herumi/mcl/blob/master/api.md)
-3. Number Theoretic Transform: [FFT over Finite Fields](https://en.wikipedia.org/wiki/Discrete_Fourier_transform_(general))
+The program runs comprehensive tests for all implemented components:
 
-## 📝 Notes
+```bash
+./cryptography_practice
+```
 
-- The implementation uses the BN_SNARK1 curve as specified
-- Random challenges in PIOPs are simulated using CSPRNG
-- In production, use Fiat-Shamir transform for non-interactivity
-- The trusted setup in KZG should use a secure ceremony in practice
+### Expected Output
+The program will display:
+1. NTT/INTT correctness verification and timing
+2. Polynomial multiplication benchmarks
+3. KZG protocol performance metrics
+4. ZeroTest PIOP proof generation and verification
+5. SumCheck PIOP proof generation and verification
+6. Complete performance summary
 
-## ✅ Completion Checklist
+## Performance Characteristics
 
-- [x] Non-recursive NTT and inverse NTT
-- [x] Polynomial interpolation example
-- [x] Polynomial multiplication using NTT
-- [x] KZG protocol implementation
-- [x] Univariate ZeroTest PIOP
-- [x] Univariate SumCheck PIOP
-- [x] Comprehensive test suite
-- [x] Performance benchmarks
-- [x] Documentation
+### Time Complexity
+- **NTT/INTT**: O(n log n) for size n
+- **Polynomial Multiplication**: O(n log n)
+- **KZG Setup**: O(n) group operations
+- **KZG Commit**: O(n) group operations
+- **KZG Prove**: O(n) field operations
+- **KZG Verify**: O(1) pairing operations
+
+### Proof Sizes
+- KZG proof: ~80 bytes (1 G1 element + 1 Fr element)
+- ZeroTest proof: ~80 bytes
+- SumCheck proof: ~80 bytes
+
+## Technical Details
+
+### Curve Configuration
+- Uses BN_SNARK1 curve as specified
+- 254-bit prime field
+- 128-bit security level
+- Optimal ate pairing
+
+### Implementation Notes
+- All polynomial operations use coefficient representation
+- NTT requires power-of-2 sizes for optimal performance
+- Primitive roots of unity are computed for the BN_SNARK1 field
+- Pairing verification uses optimized MCL library functions
+
+## Testing
+
+The implementation includes comprehensive tests:
+
+1. **Unit Tests**: Individual component verification
+2. **Integration Tests**: Full protocol execution
+3. **Performance Tests**: Timing measurements
+4. **Correctness Tests**: Mathematical property verification
+
+### Random Testing
+All tests use cryptographically secure random polynomials to ensure robustness.
+
+## Security Considerations
+
+- **Trusted Setup**: KZG requires trusted setup with toxic waste disposal
+- **Field Choice**: BN_SNARK1 provides adequate security for research
+- **Implementation**: Basic implementation for educational purposes
+
+## References
+
+1. Kate, A., Zaverucha, G. M., & Goldberg, I. (2010). Constant-size commitments to polynomials and their applications.
+2. MCL Library: https://github.com/herumi/mcl
+3. Number Theoretic Transform implementations
+4. Polynomial IOPs and commitment schemes
+
+## License
+
+Educational implementation for cryptography practice assignment.
