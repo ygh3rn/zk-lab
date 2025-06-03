@@ -1,4 +1,4 @@
-CMakeFiles/cryptography_practice.dir/kzg.cpp.o: \
+CMakeFiles/complexity_benchmark.dir/kzg.cpp.o: \
  /home/yhwong/zkp_lab/kzg.cpp /usr/include/stdc-predef.h \
  /home/yhwong/zkp_lab/kzg.h /usr/local/include/mcl/bn_c384_256.h \
  /usr/local/include/mcl/bn.h \

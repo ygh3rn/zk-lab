@@ -2,43 +2,46 @@
 #include <random>
 #include <iostream>
 #include <cstring>
+#include <cassert>
 
 // Setup phase - generates structured reference string
 KZG::SetupParams KZG::Setup(size_t max_degree) {
     SetupParams params;
     params.max_degree = max_degree;
     
-    // Generate random secret 𝜏 (toxic waste)
-    secret_tao.setByCSPRNG();
+    // Generate random secret τ (toxic waste)
+    Fr tau;
+    tau.setByCSPRNG();
     
-    // Use the simplest possible approach - start with identity and handle manually
-    G1 g1_generator;
-    g1_generator.clear();  // Zero point
+    // Generate G1 generator
+    G1 g1;
+    const char* g1_seed = "BN_SNARK1_G1_GENERATOR";
+    hashAndMapToG1(g1, g1_seed, strlen(g1_seed));
     
-    // For educational demo, create a pseudo-generator manually
-    // This is not cryptographically secure but demonstrates the concept
+    // Generate G2 generator  
+    G2 g2;
+    const char* g2_seed = "BN_SNARK1_G2_GENERATOR";
+    hashAndMapToG2(g2, g2_seed, strlen(g2_seed));
+    
+    // Compute G1 powers: [g₁, g₁^τ, g₁^τ², ..., g₁^τⁿ]
     params.g1_powers.resize(max_degree + 1);
+    Fr tau_power = Fr(1);  // τ⁰ = 1
     
     for (size_t i = 0; i <= max_degree; i++) {
-        params.g1_powers[i].clear();  // Initialize to zero
-        
-        // For demo: create distinguishable "powers" by adding scalar multiples
-        // This is not real KZG but shows the structure
-        Fr scalar = Fr(i + 1);  // Use i+1 as simple scalar
-        
-        // Since we can't easily create valid curve points, 
-        // we'll use zero points for the demo
-        // In real implementation, you'd use proper generators
+        G1::mul(params.g1_powers[i], g1, tau_power);
+        if (i < max_degree) {
+            Fr::mul(tau_power, tau_power, tau);  // τⁱ⁺¹ = τⁱ * τ
+        }
     }
     
-    // Generate G2 powers similarly
-    G2 g2_generator;
-    g2_generator.clear();
-    
+    // Compute G2 powers: [g₂, g₂^τ] (only need 2 for verification)
     params.g2_powers.resize(2);
-    for (size_t i = 0; i < 2; i++) {
-        params.g2_powers[i].clear();
-    }
+    G2::mul(params.g2_powers[0], g2, Fr(1));     // g₂
+    G2::mul(params.g2_powers[1], g2, tau);       // g₂^τ
+    
+    // Toxic waste disposal - τ is automatically destroyed when leaving scope
+    tau.clear();
+    tau_power.clear();
     
     return params;
 }
@@ -50,13 +53,22 @@ KZG::Commitment KZG::Commit(const std::vector<Fr>& coefficients, const SetupPara
     }
     
     Commitment commitment;
-    commitment.commit.clear();  // Initialize to zero
+    commitment.commit.clear();  // Initialize to identity
     
-    // Compute C = Σ(coeff_i * g^(𝜏^i))
+    // Compute C = Σᵢ(aᵢ * g₁^(τⁱ)) using multi-scalar multiplication
+    std::vector<G1> bases;
+    std::vector<Fr> scalars;
+    
     for (size_t i = 0; i < coefficients.size(); i++) {
-        G1 term;
-        G1::mul(term, params.g1_powers[i], coefficients[i]);
-        G1::add(commitment.commit, commitment.commit, term);
+        if (!coefficients[i].isZero()) {  // Skip zero coefficients
+            bases.push_back(params.g1_powers[i]);
+            scalars.push_back(coefficients[i]);
+        }
+    }
+    
+    if (!bases.empty()) {
+        // Use MCL's optimized multi-scalar multiplication
+        G1::mulVec(commitment.commit, bases.data(), scalars.data(), bases.size());
     }
     
     return commitment;
@@ -66,27 +78,26 @@ KZG::Commitment KZG::Commit(const std::vector<Fr>& coefficients, const SetupPara
 KZG::Proof KZG::CreateWitness(const std::vector<Fr>& coefficients, const Fr& z, const SetupParams& params) {
     Proof proof;
     
-    // Evaluate f(z)
+    // Evaluate f(z) = Σᵢ(aᵢ * zⁱ)
     proof.evaluation = evaluate_polynomial(coefficients, z);
     
     // Compute quotient polynomial q(x) = (f(x) - f(z)) / (x - z)
     std::vector<Fr> f_minus_fz = coefficients;
     if (!f_minus_fz.empty()) {
-        Fr::sub(f_minus_fz[0], f_minus_fz[0], proof.evaluation);  // f(x) - f(z)
+        Fr::sub(f_minus_fz[0], f_minus_fz[0], proof.evaluation);
     }
     
-    // Divide by (x - z)
-    std::vector<Fr> divisor = {z, Fr(1)};  // Represents (x - z) = -z + 1*x
-    Fr::neg(divisor[0], divisor[0]);  // Make it -z
+    // Polynomial division by (x - z)
+    std::vector<Fr> quotient = divide_polynomial_by_linear(f_minus_fz, z);
     
-    std::vector<Fr> quotient = divide_polynomial(f_minus_fz, divisor);
-    
-    // Commit to quotient polynomial
+    // Commit to quotient polynomial: W = Σᵢ(qᵢ * g₁^(τⁱ))
     proof.witness.clear();
     for (size_t i = 0; i < quotient.size() && i < params.g1_powers.size(); i++) {
-        G1 term;
-        G1::mul(term, params.g1_powers[i], quotient[i]);
-        G1::add(proof.witness, proof.witness, term);
+        if (!quotient[i].isZero()) {
+            G1 term;
+            G1::mul(term, params.g1_powers[i], quotient[i]);
+            G1::add(proof.witness, proof.witness, term);
+        }
     }
     
     return proof;
@@ -94,40 +105,40 @@ KZG::Proof KZG::CreateWitness(const std::vector<Fr>& coefficients, const Fr& z, 
 
 // Verify evaluation proof using pairing
 bool KZG::VerifyEval(const Commitment& commitment, const Fr& z, const Proof& proof, const SetupParams& params) {
-    // For demo with zero points, always return true
-    // In real implementation, this would use pairing equations
-    
-    if (params.g1_powers.empty() || params.g2_powers.empty()) {
+    if (params.g1_powers.empty() || params.g2_powers.size() < 2) {
         return false;
     }
     
-    // Check if we're using zero points (demo mode)
-    if (params.g1_powers[0].isZero() || params.g2_powers[0].isZero()) {
-        // Demo mode - verify polynomial evaluation directly
-        Fr expected = evaluate_polynomial(params.max_degree > 0 ? 
-            std::vector<Fr>(params.max_degree + 1, Fr(1)) : std::vector<Fr>{Fr(1)}, z);
-        return true;  // Always pass for demo
-    }
+    // Pairing verification: e(C - g₁^f(z), g₂) = e(W, g₂^τ - g₂^z)
     
-    // Real pairing verification (if we had valid generators)
+    // Compute C - g₁^f(z)
+    G1 g1_eval;
+    G1::mul(g1_eval, params.g1_powers[0], proof.evaluation);
+    G1 left_g1;
+    G1::sub(left_g1, commitment.commit, g1_eval);
+    
+    // Compute g₂^τ - g₂^z  
+    G2 g2_z;
+    G2::mul(g2_z, params.g2_powers[0], z);
+    G2 right_g2;
+    G2::sub(right_g2, params.g2_powers[1], g2_z);
+    
+    // Compute pairings
     GT left_pairing, right_pairing;
-    
-    // Simplified verification for demo
-    pairing(left_pairing, commitment.commit, params.g2_powers[0]);
-    pairing(right_pairing, proof.witness, params.g2_powers[0]);
+    pairing(left_pairing, left_g1, params.g2_powers[0]);     // e(C - g₁^f(z), g₂)
+    pairing(right_pairing, proof.witness, right_g2);         // e(W, g₂^τ - g₂^z)
     
     return left_pairing == right_pairing;
 }
 
-// Evaluate polynomial at point x
+// Evaluate polynomial at point x using Horner's method
 Fr KZG::evaluate_polynomial(const std::vector<Fr>& coefficients, const Fr& x) {
     if (coefficients.empty()) {
         return Fr(0);
     }
     
-    Fr result = coefficients.back();  // Start with highest degree coefficient
+    Fr result = coefficients.back();
     
-    // Horner's method
     for (int i = coefficients.size() - 2; i >= 0; i--) {
         Fr::mul(result, result, x);
         Fr::add(result, result, coefficients[i]);
@@ -136,14 +147,39 @@ Fr KZG::evaluate_polynomial(const std::vector<Fr>& coefficients, const Fr& x) {
     return result;
 }
 
-// Polynomial division - returns quotient of dividend / divisor
+// Optimized division by linear polynomial (x - z)
+std::vector<Fr> KZG::divide_polynomial_by_linear(const std::vector<Fr>& dividend, const Fr& z) {
+    if (dividend.empty()) {
+        return {};
+    }
+    
+    if (dividend.size() == 1) {
+        // Constant polynomial: should be zero if divisible
+        return {};
+    }
+    
+    std::vector<Fr> quotient(dividend.size() - 1);
+    
+    // Synthetic division algorithm
+    quotient[quotient.size() - 1] = dividend.back();
+    
+    for (int i = quotient.size() - 2; i >= 0; i--) {
+        Fr temp;
+        Fr::mul(temp, quotient[i + 1], z);
+        Fr::add(quotient[i], dividend[i + 1], temp);
+    }
+    
+    return quotient;
+}
+
+// General polynomial division (kept for compatibility)
 std::vector<Fr> KZG::divide_polynomial(const std::vector<Fr>& dividend, const std::vector<Fr>& divisor) {
     if (divisor.empty() || divisor.back().isZero()) {
         throw std::invalid_argument("Invalid divisor");
     }
     
     if (dividend.size() < divisor.size()) {
-        return {};  // Quotient is zero
+        return {};
     }
     
     std::vector<Fr> quotient(dividend.size() - divisor.size() + 1);
@@ -151,10 +187,8 @@ std::vector<Fr> KZG::divide_polynomial(const std::vector<Fr>& dividend, const st
     
     for (int i = quotient.size() - 1; i >= 0; i--) {
         if (remainder.size() >= divisor.size()) {
-            // Calculate coefficient
             Fr::div(quotient[i], remainder.back(), divisor.back());
             
-            // Subtract divisor * coefficient from remainder
             for (size_t j = 0; j < divisor.size(); j++) {
                 Fr term;
                 Fr::mul(term, quotient[i], divisor[j]);

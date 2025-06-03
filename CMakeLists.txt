@@ -36,6 +36,8 @@ set(SOURCES
 
 # Create executable
 add_executable(cryptography_practice ${SOURCES})
+add_executable(complexity_benchmark complexity_benchmark.cpp kzg.cpp)
+target_link_libraries(complexity_benchmark ${MCL_LIBRARY})
 
 # Link libraries
 target_link_libraries(cryptography_practice ${MCL_LIBRARY})

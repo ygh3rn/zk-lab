@@ -185,6 +185,19 @@ cryptography_practice/fast:
 .PHONY : cryptography_practice/fast
 
 #=============================================================================
+# Target rules for targets named complexity_benchmark
+
+# Build rule for target.
+complexity_benchmark: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 complexity_benchmark
+.PHONY : complexity_benchmark
+
+# fast build rule for target.
+complexity_benchmark/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/complexity_benchmark.dir/build.make CMakeFiles/complexity_benchmark.dir/build
+.PHONY : complexity_benchmark/fast
+
+#=============================================================================
 # Target rules for targets named run
 
 # Build rule for target.
@@ -197,12 +210,37 @@ run/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run.dir/build.make CMakeFiles/run.dir/build
 .PHONY : run/fast
 
+complexity_benchmark.o: complexity_benchmark.cpp.o
+.PHONY : complexity_benchmark.o
+
+# target to build an object file
+complexity_benchmark.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/complexity_benchmark.dir/build.make CMakeFiles/complexity_benchmark.dir/complexity_benchmark.cpp.o
+.PHONY : complexity_benchmark.cpp.o
+
+complexity_benchmark.i: complexity_benchmark.cpp.i
+.PHONY : complexity_benchmark.i
+
+# target to preprocess a source file
+complexity_benchmark.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/complexity_benchmark.dir/build.make CMakeFiles/complexity_benchmark.dir/complexity_benchmark.cpp.i
+.PHONY : complexity_benchmark.cpp.i
+
+complexity_benchmark.s: complexity_benchmark.cpp.s
+.PHONY : complexity_benchmark.s
+
+# target to generate assembly for a file
+complexity_benchmark.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/complexity_benchmark.dir/build.make CMakeFiles/complexity_benchmark.dir/complexity_benchmark.cpp.s
+.PHONY : complexity_benchmark.cpp.s
+
 kzg.o: kzg.cpp.o
 .PHONY : kzg.o
 
 # target to build an object file
 kzg.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cryptography_practice.dir/build.make CMakeFiles/cryptography_practice.dir/kzg.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/complexity_benchmark.dir/build.make CMakeFiles/complexity_benchmark.dir/kzg.cpp.o
 .PHONY : kzg.cpp.o
 
 kzg.i: kzg.cpp.i
@@ -211,6 +249,7 @@ kzg.i: kzg.cpp.i
 # target to preprocess a source file
 kzg.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cryptography_practice.dir/build.make CMakeFiles/cryptography_practice.dir/kzg.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/complexity_benchmark.dir/build.make CMakeFiles/complexity_benchmark.dir/kzg.cpp.i
 .PHONY : kzg.cpp.i
 
 kzg.s: kzg.cpp.s
@@ -219,6 +258,7 @@ kzg.s: kzg.cpp.s
 # target to generate assembly for a file
 kzg.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cryptography_practice.dir/build.make CMakeFiles/cryptography_practice.dir/kzg.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/complexity_benchmark.dir/build.make CMakeFiles/complexity_benchmark.dir/kzg.cpp.s
 .PHONY : kzg.cpp.s
 
 protocol.o: protocol.cpp.o
@@ -259,7 +299,11 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... test"
 	@echo "... run"
+	@echo "... complexity_benchmark"
 	@echo "... cryptography_practice"
+	@echo "... complexity_benchmark.o"
+	@echo "... complexity_benchmark.i"
+	@echo "... complexity_benchmark.s"
 	@echo "... kzg.o"
 	@echo "... kzg.i"
 	@echo "... kzg.s"

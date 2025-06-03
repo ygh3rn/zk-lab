@@ -64,6 +64,7 @@ CMAKE_BINARY_DIR = /home/yhwong/zkp_lab/build
 
 # The main recursive "all" target.
 all: CMakeFiles/cryptography_practice.dir/all
+all: CMakeFiles/complexity_benchmark.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -72,6 +73,7 @@ preinstall:
 
 # The main recursive "clean" target.
 clean: CMakeFiles/cryptography_practice.dir/clean
+clean: CMakeFiles/complexity_benchmark.dir/clean
 clean: CMakeFiles/run.dir/clean
 .PHONY : clean
 
@@ -82,7 +84,7 @@ clean: CMakeFiles/run.dir/clean
 CMakeFiles/cryptography_practice.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cryptography_practice.dir/build.make CMakeFiles/cryptography_practice.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cryptography_practice.dir/build.make CMakeFiles/cryptography_practice.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yhwong/zkp_lab/build/CMakeFiles --progress-num=1,2,3 "Built target cryptography_practice"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yhwong/zkp_lab/build/CMakeFiles --progress-num=4,5,6 "Built target cryptography_practice"
 .PHONY : CMakeFiles/cryptography_practice.dir/all
 
 # Build rule for subdir invocation for target.
@@ -100,6 +102,32 @@ cryptography_practice: CMakeFiles/cryptography_practice.dir/rule
 CMakeFiles/cryptography_practice.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/cryptography_practice.dir/build.make CMakeFiles/cryptography_practice.dir/clean
 .PHONY : CMakeFiles/cryptography_practice.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/complexity_benchmark.dir
+
+# All Build rule for target.
+CMakeFiles/complexity_benchmark.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/complexity_benchmark.dir/build.make CMakeFiles/complexity_benchmark.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/complexity_benchmark.dir/build.make CMakeFiles/complexity_benchmark.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yhwong/zkp_lab/build/CMakeFiles --progress-num=1,2,3 "Built target complexity_benchmark"
+.PHONY : CMakeFiles/complexity_benchmark.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/complexity_benchmark.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yhwong/zkp_lab/build/CMakeFiles 3
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/complexity_benchmark.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yhwong/zkp_lab/build/CMakeFiles 0
+.PHONY : CMakeFiles/complexity_benchmark.dir/rule
+
+# Convenience name for target.
+complexity_benchmark: CMakeFiles/complexity_benchmark.dir/rule
+.PHONY : complexity_benchmark
+
+# clean rule for target.
+CMakeFiles/complexity_benchmark.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/complexity_benchmark.dir/build.make CMakeFiles/complexity_benchmark.dir/clean
+.PHONY : CMakeFiles/complexity_benchmark.dir/clean
 
 #=============================================================================
 # Target rules for target CMakeFiles/run.dir
