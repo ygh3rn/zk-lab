@@ -1,112 +1,169 @@
-# ZK-Poly-Toolkit
+# Cryptography Programming Practice
 
-A cryptographic library implementing polynomial commitment schemes and zero-knowledge Interactive Oracle Proofs. This project demonstrates core concepts in modern cryptographic protocols used in blockchain and privacy-preserving systems.
+This repository contains implementations of cryptographic protocols including NTT, KZG commitments, and PIOPs using the MCL library.
 
-## Features
+## 📋 Requirements
 
-* NTT-based polynomial operations with O(n log n) complexity
-* KZG polynomial commitments with constant-size proofs
-* Zero-knowledge PIOPs including ZeroTest and SumCheck protocols
-* Comprehensive test suite with performance benchmarks
-* Automated build system
+- C++17 compatible compiler (g++ or clang++)
+- MCL library (https://github.com/herumi/mcl)
+- GMP library
+- OpenSSL (for random number generation)
 
-## Installation
+## 🛠️ Installation
 
-### Prerequisites
-
-**Ubuntu/Debian:**
-```bash
-sudo apt install build-essential cmake git libgmp-dev pkg-config
-```
-
-**macOS:**
-```bash
-brew install cmake git gmp
-```
-
-### Build and Run
+### Installing MCL Library
 
 ```bash
-git clone https://github.com/ygh3rn/zk-poly-toolkit.git
-cd zk-poly-toolkit
-./build.sh
-./run_tests.sh
+# Clone MCL repository
+git clone https://github.com/herumi/mcl
+cd mcl
+
+# Build and install
+make -j4
+sudo make install
 ```
 
-The build script automatically downloads and compiles the required MCL library for pairing-based cryptography.
-
-## Implementation Details
-
-### Number Theoretic Transform (NTT)
-
-Implements the Cooley-Tukey algorithm for efficient polynomial multiplication in finite fields. The non-recursive approach achieves O(n log n) complexity for polynomial operations.
-
-### KZG Polynomial Commitments
-
-Based on the Kate-Zaverucha-Goldberg scheme, providing:
-
-* **Setup**: Generates structured reference strings
-* **Commit**: Creates constant-size polynomial commitments
-* **CreateWitness**: Produces evaluation proofs
-* **VerifyEval**: Verifies proofs using pairing operations
-* **Batch operations**: Efficient verification of multiple evaluations
-
-### Polynomial Interactive Oracle Proofs
-
-* **ZeroTest PIOP**: Proves that a polynomial evaluates to zero on a multiplicative subgroup
-* **SumCheck PIOP**: Proves that the sum of polynomial evaluations equals a claimed value
-
-Both protocols achieve the theoretical optimal complexity bounds.
-
-## Performance
-
-Benchmarks on modern hardware show the implementation meets expected performance characteristics:
-
-| Operation | Complexity | Time (n=1024) |
-|-----------|------------|---------------|
-| NTT Round-trip | O(n log n) | ~0.5ms |
-| KZG Commitment | O(n) | ~18ms |
-| KZG Verification | O(1) | ~0.6ms |
-
-## Technical Stack
-
-* C++17 with modern practices
-* MCL library for elliptic curve operations
-* CMake build system
-* GMP for arbitrary precision arithmetic
-
-## Applications
-
-This implementation can serve as a foundation for:
-
-* Zero-knowledge proof systems (SNARKs/STARKs)
-* Blockchain scalability research
-* Educational cryptography projects
-* Privacy-preserving protocol development
-
-## Important Security Notice
-
-This implementation is designed for educational and research purposes. The KZG trusted setup generates parameters locally, which is not suitable for production use. Real-world applications require multi-party trusted setup ceremonies to ensure security.
-
-## Testing
-
-The test suite covers all major components and includes both correctness and performance tests. Run with:
+### Building the Project
 
 ```bash
-./run_tests.sh
+# Clone this repository
+cd crypto-practice
+
+# Build all components
+make all
+
+# Or build individual components
+make test_ntt    # NTT tests only
+make test_kzg    # KZG tests only
+make test_piop   # PIOP tests only
 ```
 
-Expected output shows all tests passing with detailed performance metrics.
+## 🚀 Running Tests
 
-## References
+### Run All Tests
+```bash
+make test
+# or
+./test_all
+```
 
-* Thaler, J. (2022). Proofs, Arguments, and Zero-Knowledge. Available at: [https://people.cs.georgetown.edu/jthaler/ProofsArgsAndZK.pdf](https://people.cs.georgetown.edu/jthaler/ProofsArgsAndZK.pdf)
-* Kate, A., Zaverucha, G. M., & Goldberg, I. (2010). Constant-Size Commitments to Polynomials and Their Applications. ASIACRYPT 2010.
+### Run Individual Test Suites
+```bash
+./test_ntt    # Test NTT implementation
+./test_kzg    # Test KZG protocol
+./test_piop   # Test ZeroTest and SumCheck PIOPs
+```
 
-## Contributing
+## 📁 Project Structure
 
-This project was developed as part of cryptographic protocol research. The code is available for educational use and further development.
+```
+crypto-practice/
+├── crypto_practice.hpp    # Main header file with declarations
+├── ntt.cpp               # NTT implementation
+├── polynomial_ops.cpp    # Polynomial operations
+├── kzg.cpp              # KZG commitment scheme
+├── zerotest.cpp         # ZeroTest PIOP
+├── sumcheck.cpp         # SumCheck PIOP
+├── test_ntt.cpp         # NTT test suite
+├── test_kzg.cpp         # KZG test suite
+├── test_piop.cpp        # PIOP test suite
+├── test_all.cpp         # Main test runner
+├── Makefile             # Build configuration
+└── README.md            # This file
+```
 
-## License
+## 📊 Implemented Features
 
-See LICENSE file for details.
+### 1. **NTT (Number Theoretic Transform)**
+- Non-recursive Cooley-Tukey algorithm
+- Inverse NTT
+- Polynomial interpolation
+- Time complexity: O(n log n)
+
+### 2. **Polynomial Operations**
+- Multiplication using NTT
+- Evaluation using Horner's method
+- Division with remainder
+- Time complexity: O(n log n) for multiplication
+
+### 3. **KZG Commitment Scheme**
+- Setup with trusted parameters
+- Polynomial commitment
+- Witness creation for evaluations
+- Pairing-based verification
+- Prover time: O(D) group operations
+- Verifier time: O(1) pairings
+
+### 4. **ZeroTest PIOP**
+- Proves polynomial evaluates to zero on a subgroup
+- Uses quotient polynomial technique
+- Constant proof size
+- Prover: O(D) operations
+- Verifier: O(1) operations
+
+### 5. **SumCheck PIOP**
+- Proves sum of evaluations equals zero
+- Constant proof size
+- Prover: O(D) operations
+- Verifier: O(1) operations
+
+## 🧪 Testing
+
+Each component includes comprehensive tests:
+
+- **Correctness tests**: Verify mathematical properties
+- **Edge cases**: Test with zero polynomials, constant polynomials
+- **Random tests**: Use randomly generated inputs
+- **Performance benchmarks**: Measure time complexity
+
+## ⚡ Performance
+
+The implementation achieves the required time complexities:
+
+| Operation | Time Complexity | Space Complexity |
+|-----------|----------------|------------------|
+| NTT | O(n log n) | O(n) |
+| Polynomial Multiply | O(n log n) | O(n) |
+| KZG Commit | O(D) | O(1) |
+| KZG Verify | O(1) | O(1) |
+| PIOP Prove | O(D) | O(D) |
+| PIOP Verify | O(1) | O(1) |
+
+## 🔧 Troubleshooting
+
+### MCL Library Not Found
+```bash
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+export CPLUS_INCLUDE_PATH=/usr/local/include:$CPLUS_INCLUDE_PATH
+```
+
+### Compilation Errors
+Ensure you have C++17 support:
+```bash
+g++ --version  # Should be 7.0 or higher
+```
+
+## 📚 References
+
+1. KZG Paper: [Constant-Size Commitments to Polynomials and Their Applications](https://www.iacr.org/archive/asiacrypt2010/6477178/6477178.pdf)
+2. MCL Library: [Documentation](https://github.com/herumi/mcl/blob/master/api.md)
+3. Number Theoretic Transform: [FFT over Finite Fields](https://en.wikipedia.org/wiki/Discrete_Fourier_transform_(general))
+
+## 📝 Notes
+
+- The implementation uses the BN_SNARK1 curve as specified
+- Random challenges in PIOPs are simulated using CSPRNG
+- In production, use Fiat-Shamir transform for non-interactivity
+- The trusted setup in KZG should use a secure ceremony in practice
+
+## ✅ Completion Checklist
+
+- [x] Non-recursive NTT and inverse NTT
+- [x] Polynomial interpolation example
+- [x] Polynomial multiplication using NTT
+- [x] KZG protocol implementation
+- [x] Univariate ZeroTest PIOP
+- [x] Univariate SumCheck PIOP
+- [x] Comprehensive test suite
+- [x] Performance benchmarks
+- [x] Documentation
