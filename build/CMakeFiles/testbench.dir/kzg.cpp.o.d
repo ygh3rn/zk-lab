@@ -1,8 +1,8 @@
-CMakeFiles/cryptography_practice.dir/kzg.cpp.o: \
- /home/yhwong/zkp_lab/kzg.cpp /usr/include/stdc-predef.h \
- /home/yhwong/zkp_lab/kzg.h /usr/local/include/mcl/bn.hpp \
- /usr/local/include/mcl/g1_def.hpp /usr/local/include/mcl/ec.hpp \
- /usr/include/c++/13/stdlib.h /usr/include/c++/13/cstdlib \
+CMakeFiles/testbench.dir/kzg.cpp.o: /home/yhwong/zkp_lab/kzg.cpp \
+ /usr/include/stdc-predef.h /home/yhwong/zkp_lab/kzg.h \
+ /usr/local/include/mcl/bn.hpp /usr/local/include/mcl/g1_def.hpp \
+ /usr/local/include/mcl/ec.hpp /usr/include/c++/13/stdlib.h \
+ /usr/include/c++/13/cstdlib \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
