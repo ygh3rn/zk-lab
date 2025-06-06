@@ -508,10 +508,7 @@ void CryptographyPractice::test_security_properties() {
 void CryptographyPractice::run_tests() {
     cout << "=== Enhanced Cryptography Practice Implementation Tests ===" << endl;
     
-    int result = mclBn_init(MCL_BN_SNARK1, MCLBN_COMPILED_TIME_VAR);
-    if (result != 0) {
-        throw runtime_error("Failed to initialize MCL library");
-    }
+    initPairing(mcl::BN_SNARK1);
     cout << "MCL library initialized with BN_SNARK1 curve" << endl;
     
     cout << "\n1. Testing Enhanced NTT and INTT..." << endl;

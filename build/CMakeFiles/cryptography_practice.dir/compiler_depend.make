@@ -639,11 +639,9 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: /home/yhwong/zkp_lab/protoc
   /usr/local/include/cybozu/xorshift.hpp \
   /usr/local/include/mcl/array.hpp \
   /usr/local/include/mcl/bint.hpp \
-  /usr/local/include/mcl/bls12_381.hpp \
   /usr/local/include/mcl/bn.h \
   /usr/local/include/mcl/bn.hpp \
   /usr/local/include/mcl/bn_c256.h \
-  /usr/local/include/mcl/bn_c384_256.h \
   /usr/local/include/mcl/config.hpp \
   /usr/local/include/mcl/conversion.hpp \
   /usr/local/include/mcl/curve_type.h \
@@ -665,10 +663,6 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: /home/yhwong/zkp_lab/protoc
   /usr/local/include/mcl/vint.hpp \
   /usr/local/include/mcl/window_method.hpp
 
-
-/usr/local/include/mcl/bn_c384_256.h:
-
-/usr/local/include/mcl/bls12_381.hpp:
 
 /usr/include/c++/13/ratio:
 
