@@ -348,8 +348,8 @@ public:
         
         // For BN_SNARK1, find nth root of unity
         Fr candidate = Fr(5);
-        Fr field_size_minus_one;
-        field_size_minus_one.setStr("21888242871839275222246405745257275088548364400416034343698204186575808495616", 10);
+        Fr field_size_minus_one = Fr(-1);
+        
         Fr::sub(field_size_minus_one, field_size_minus_one, Fr(1));
         
         Fr exponent;
