@@ -179,8 +179,8 @@ vector<Fr> CryptographyPractice::polynomial_interpolate_lagrange(const vector<Fr
                 Fr::sub(denominator, x_vals[i], x_vals[j]);
                 Fr inv_denom = mod_inverse(denominator);
                 
-                vector<Fr> linear = {x_vals[j], Fr(1)};
-                Fr::neg(linear[0], linear[0]);
+                vector<Fr> linear = {Fr(0), Fr(1)};
+                Fr::sub(linear[0], linear[0], x_vals[j]);
                 
                 basis = polynomial_multiply(basis, linear);
                 
@@ -312,9 +312,7 @@ Fr CryptographyPractice::find_primitive_root(size_t n) {
         throw invalid_argument("n must be power of 2");
     }
     
-    // Use MCL's built-in Fr order instead of hardcoded string
-    Fr field_order_minus_one;
-    field_order_minus_one.setStr("30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000000", 16);
+    Fr field_order_minus_one = Fr(-1);
     
     Fr exponent;
     Fr::div(exponent, field_order_minus_one, Fr(n));
@@ -332,17 +330,17 @@ Fr CryptographyPractice::find_primitive_root(size_t n) {
         if (test_n == Fr(1)) {
             bool is_primitive = true;
             
-            for (size_t divisor = 2; divisor < n; divisor <<= 1) {
+            for (size_t divisor = 2; divisor < n; divisor++) {
                 if (n % divisor == 0) {
                     Fr test_order;
-                    Fr::pow(test_order, root, Fr(n / divisor));
+                    Fr::pow(test_order, root, Fr(divisor));
                     if (test_order == Fr(1)) {
                         is_primitive = false;
                         break;
                     }
                 }
             }
-            
+                    
             if (is_primitive) {
                 return root;
             }
