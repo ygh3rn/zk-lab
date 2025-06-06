@@ -20,7 +20,6 @@ CMakeFiles/cryptography_practice.dir/kzg.cpp.o: /home/yhwong/zkp_lab/kzg.cpp \
   /usr/include/c++/13/bits/basic_string.tcc \
   /usr/include/c++/13/bits/char_traits.h \
   /usr/include/c++/13/bits/charconv.h \
-  /usr/include/c++/13/bits/chrono.h \
   /usr/include/c++/13/bits/concept_check.h \
   /usr/include/c++/13/bits/cpp_type_traits.h \
   /usr/include/c++/13/bits/cxxabi_forced.h \
@@ -51,7 +50,6 @@ CMakeFiles/cryptography_practice.dir/kzg.cpp.o: /home/yhwong/zkp_lab/kzg.cpp \
   /usr/include/c++/13/bits/node_handle.h \
   /usr/include/c++/13/bits/ostream.tcc \
   /usr/include/c++/13/bits/ostream_insert.h \
-  /usr/include/c++/13/bits/parse_numbers.h \
   /usr/include/c++/13/bits/postypes.h \
   /usr/include/c++/13/bits/predefined_ops.h \
   /usr/include/c++/13/bits/ptr_traits.h \
@@ -91,7 +89,6 @@ CMakeFiles/cryptography_practice.dir/kzg.cpp.o: /home/yhwong/zkp_lab/kzg.cpp \
   /usr/include/c++/13/cassert \
   /usr/include/c++/13/cctype \
   /usr/include/c++/13/cerrno \
-  /usr/include/c++/13/chrono \
   /usr/include/c++/13/clocale \
   /usr/include/c++/13/cmath \
   /usr/include/c++/13/compare \
@@ -100,7 +97,6 @@ CMakeFiles/cryptography_practice.dir/kzg.cpp.o: /home/yhwong/zkp_lab/kzg.cpp \
   /usr/include/c++/13/cstdio \
   /usr/include/c++/13/cstdlib \
   /usr/include/c++/13/cstring \
-  /usr/include/c++/13/ctime \
   /usr/include/c++/13/cwchar \
   /usr/include/c++/13/cwctype \
   /usr/include/c++/13/debug/assertions.h \
@@ -127,7 +123,6 @@ CMakeFiles/cryptography_practice.dir/kzg.cpp.o: /home/yhwong/zkp_lab/kzg.cpp \
   /usr/include/c++/13/pstl/glue_numeric_defs.h \
   /usr/include/c++/13/pstl/pstl_config.h \
   /usr/include/c++/13/random \
-  /usr/include/c++/13/ratio \
   /usr/include/c++/13/sstream \
   /usr/include/c++/13/stdexcept \
   /usr/include/c++/13/stdlib.h \
@@ -405,9 +400,12 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: /home/yhwong/zkp_lab/protoc
   /usr/include/c++/13/bits/stl_iterator.h \
   /usr/include/c++/13/bits/stl_iterator_base_funcs.h \
   /usr/include/c++/13/bits/stl_iterator_base_types.h \
+  /usr/include/c++/13/bits/stl_multiset.h \
   /usr/include/c++/13/bits/stl_numeric.h \
   /usr/include/c++/13/bits/stl_pair.h \
+  /usr/include/c++/13/bits/stl_set.h \
   /usr/include/c++/13/bits/stl_tempbuf.h \
+  /usr/include/c++/13/bits/stl_tree.h \
   /usr/include/c++/13/bits/stl_uninitialized.h \
   /usr/include/c++/13/bits/stl_vector.h \
   /usr/include/c++/13/bits/streambuf.tcc \
@@ -459,6 +457,7 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: /home/yhwong/zkp_lab/protoc
   /usr/include/c++/13/pstl/pstl_config.h \
   /usr/include/c++/13/random \
   /usr/include/c++/13/ratio \
+  /usr/include/c++/13/set \
   /usr/include/c++/13/sstream \
   /usr/include/c++/13/stdexcept \
   /usr/include/c++/13/stdlib.h \
@@ -640,11 +639,9 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: /home/yhwong/zkp_lab/protoc
   /usr/local/include/cybozu/xorshift.hpp \
   /usr/local/include/mcl/array.hpp \
   /usr/local/include/mcl/bint.hpp \
-  /usr/local/include/mcl/bls12_381.hpp \
   /usr/local/include/mcl/bn.h \
   /usr/local/include/mcl/bn.hpp \
   /usr/local/include/mcl/bn_c256.h \
-  /usr/local/include/mcl/bn_c384_256.h \
   /usr/local/include/mcl/config.hpp \
   /usr/local/include/mcl/conversion.hpp \
   /usr/local/include/mcl/curve_type.h \
@@ -667,9 +664,15 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: /home/yhwong/zkp_lab/protoc
   /usr/local/include/mcl/window_method.hpp
 
 
-/usr/local/include/mcl/bn_c384_256.h:
+/usr/include/c++/13/ratio:
 
-/usr/local/include/mcl/bls12_381.hpp:
+/usr/include/c++/13/ctime:
+
+/usr/include/c++/13/chrono:
+
+/usr/include/c++/13/bits/stl_tree.h:
+
+/usr/include/c++/13/bits/stl_multiset.h:
 
 /home/yhwong/zkp_lab/protocol.cpp:
 
@@ -702,6 +705,8 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: /home/yhwong/zkp_lab/protoc
 /usr/local/include/mcl/bn.h:
 
 /usr/local/include/cybozu/xorshift.hpp:
+
+/usr/include/c++/13/set:
 
 /usr/local/include/cybozu/stream.hpp:
 
@@ -769,31 +774,11 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: /home/yhwong/zkp_lab/protoc
 
 /usr/include/x86_64-linux-gnu/bits/unistd.h:
 
-/usr/include/x86_64-linux-gnu/bits/unistd-decl.h:
-
-/usr/include/x86_64-linux-gnu/bits/uintn-identity.h:
-
-/usr/include/x86_64-linux-gnu/bits/typesizes.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/timer_t.h:
-
-/usr/include/c++/13/ratio:
-
-/usr/include/c++/13/bits/sstream.tcc:
-
-/usr/local/include/mcl/array.hpp:
-
-/usr/include/c++/13/cwctype:
-
 /usr/include/c++/13/pstl/glue_algorithm_defs.h:
 
 /usr/include/c++/13/pstl/execution_defs.h:
 
 /usr/include/c++/13/bits/basic_ios.tcc:
-
-/usr/include/x86_64-linux-gnu/bits/types/wint_t.h:
-
-/usr/include/c++/13/limits:
 
 /usr/include/c++/13/istream:
 
@@ -820,8 +805,6 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: /home/yhwong/zkp_lab/protoc
 /usr/include/c++/13/debug/assertions.h:
 
 /usr/include/x86_64-linux-gnu/bits/select-decl.h:
-
-/usr/include/c++/13/ctime:
 
 /usr/include/c++/13/cstring:
 
@@ -852,6 +835,8 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: /home/yhwong/zkp_lab/protoc
 /usr/include/c++/13/tr1/poly_hermite.tcc:
 
 /usr/include/c++/13/bits/vector.tcc:
+
+/usr/include/c++/13/stdlib.h:
 
 /usr/include/c++/13/bits/stl_function.h:
 
@@ -885,13 +870,17 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: /home/yhwong/zkp_lab/protoc
 
 /usr/include/x86_64-linux-gnu/bits/libc-header-start.h:
 
+/usr/include/c++/13/new:
+
+/usr/include/c++/13/ext/alloc_traits.h:
+
+/usr/include/c++/13/bits/stl_heap.h:
+
 /usr/include/c++/13/bits/stl_construct.h:
 
 /usr/include/c++/13/bits/stl_bvector.h:
 
 /usr/include/c++/13/bits/stl_algobase.h:
-
-/usr/include/c++/13/chrono:
 
 /usr/include/c++/13/bits/stl_algo.h:
 
@@ -905,17 +894,35 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: /home/yhwong/zkp_lab/protoc
 
 /usr/include/c++/13/bits/uses_allocator.h:
 
+/usr/include/c++/13/bits/parse_numbers.h:
+
+/usr/include/c++/13/bits/std_abs.h:
+
 /usr/include/c++/13/bits/postypes.h:
 
 /usr/include/linux/falloc.h:
 
 /usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h:
 
-/usr/include/c++/13/cstdlib:
-
 /usr/local/include/mcl/curve_type.hpp:
 
 /usr/include/c++/13/cstdint:
+
+/usr/include/c++/13/cstdlib:
+
+/usr/include/x86_64-linux-gnu/bits/long-double.h:
+
+/usr/include/c++/13/bits/algorithmfwd.h:
+
+/usr/local/include/mcl/randgen.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/wchar2.h:
+
+/usr/include/x86_64-linux-gnu/bits/fp-logb.h:
+
+/usr/include/c++/13/bits/alloc_traits.h:
+
+/usr/include/c++/13/bits/concept_check.h:
 
 /usr/include/c++/13/bits/exception_ptr.h:
 
@@ -931,35 +938,15 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: /home/yhwong/zkp_lab/protoc
 
 /usr/include/c++/13/bits/cpp_type_traits.h:
 
+/usr/include/c++/13/string:
+
+/usr/include/x86_64-linux-gnu/bits/stdint-intn.h:
+
 /usr/include/x86_64-linux-gnu/bits/types.h:
 
 /usr/include/c++/13/bits/move.h:
 
 /usr/include/c++/13/bits/locale_facets.h:
-
-/usr/include/x86_64-linux-gnu/c++/13/bits/ctype_inline.h:
-
-/usr/include/c++/13/bits/std_function.h:
-
-/usr/include/c++/13/bits/char_traits.h:
-
-/usr/include/c++/13/bits/hashtable_policy.h:
-
-/usr/local/include/cybozu/hash.hpp:
-
-/usr/include/x86_64-linux-gnu/bits/types/clock_t.h:
-
-/usr/include/c++/13/bits/streambuf.tcc:
-
-/usr/include/c++/13/bits/specfun.h:
-
-/usr/include/c++/13/bits/basic_string.h:
-
-/usr/include/c++/13/tr1/poly_laguerre.tcc:
-
-/usr/include/c++/13/bits/chrono.h:
-
-/usr/include/x86_64-linux-gnu/bits/endianness.h:
 
 /usr/include/c++/13/backward/binders.h:
 
@@ -993,6 +980,12 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: /home/yhwong/zkp_lab/protoc
 
 /usr/include/c++/13/bits/predefined_ops.h:
 
+/usr/local/include/mcl/array.hpp:
+
+/usr/include/c++/13/cwctype:
+
+/usr/include/c++/13/bits/sstream.tcc:
+
 /usr/include/c++/13/bits/localefwd.h:
 
 /usr/include/c++/13/bits/streambuf_iterator.h:
@@ -1004,10 +997,6 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: /home/yhwong/zkp_lab/protoc
 /usr/include/c++/13/bits/exception_defines.h:
 
 /usr/include/assert.h:
-
-/usr/include/c++/13/bits/concept_check.h:
-
-/usr/include/c++/13/bits/alloc_traits.h:
 
 /usr/include/alloca.h:
 
@@ -1029,27 +1018,27 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: /home/yhwong/zkp_lab/protoc
 
 /usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
 
+/usr/include/x86_64-linux-gnu/bits/uintn-identity.h:
+
 /usr/include/c++/13/bits/cxxabi_init_exception.h:
 
 /usr/include/c++/13/typeinfo:
 
+/usr/include/c++/13/bits/hashtable_policy.h:
+
+/usr/include/x86_64-linux-gnu/c++/13/bits/ctype_inline.h:
+
+/usr/include/c++/13/bits/std_function.h:
+
+/usr/include/c++/13/bits/char_traits.h:
+
+/usr/local/include/cybozu/hash.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/types/clock_t.h:
+
 /usr/include/c++/13/bits/basic_ios.h:
 
 /usr/include/x86_64-linux-gnu/bits/time64.h:
-
-/usr/include/x86_64-linux-gnu/bits/long-double.h:
-
-/usr/include/c++/13/bits/algorithmfwd.h:
-
-/usr/local/include/mcl/randgen.hpp:
-
-/usr/include/x86_64-linux-gnu/bits/wchar2.h:
-
-/usr/include/x86_64-linux-gnu/bits/fp-logb.h:
-
-/usr/include/c++/13/ext/alloc_traits.h:
-
-/usr/include/c++/13/new:
 
 /usr/include/c++/13/bits/functional_hash.h:
 
@@ -1058,6 +1047,8 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: /home/yhwong/zkp_lab/protoc
 /usr/lib/gcc/x86_64-linux-gnu/13/include/stdarg.h:
 
 /usr/include/c++/13/numeric:
+
+/usr/include/c++/13/bits/stl_set.h:
 
 /usr/include/c++/13/bits/ostream_insert.h:
 
@@ -1085,12 +1076,6 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: /home/yhwong/zkp_lab/protoc
 
 /usr/include/c++/13/bits/memoryfwd.h:
 
-/usr/include/c++/13/bits/stl_heap.h:
-
-/usr/include/c++/13/bits/std_abs.h:
-
-/usr/include/c++/13/bits/parse_numbers.h:
-
 /usr/include/c++/13/ios:
 
 /usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
@@ -1105,6 +1090,20 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: /home/yhwong/zkp_lab/protoc
 
 /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h:
 
+/usr/include/c++/13/bits/basic_string.h:
+
+/usr/include/c++/13/tr1/poly_laguerre.tcc:
+
+/usr/include/c++/13/bits/chrono.h:
+
+/usr/include/x86_64-linux-gnu/bits/endianness.h:
+
+/usr/include/c++/13/bits/streambuf.tcc:
+
+/usr/include/c++/13/bits/specfun.h:
+
+/usr/include/c++/13/stdexcept:
+
 /usr/include/c++/13/compare:
 
 /usr/include/c++/13/system_error:
@@ -1116,14 +1115,6 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: /home/yhwong/zkp_lab/protoc
 /usr/include/c++/13/bits/refwrap.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h:
-
-/usr/include/c++/13/stdexcept:
-
-/usr/include/c++/13/stdlib.h:
-
-/usr/include/x86_64-linux-gnu/bits/stdint-intn.h:
-
-/usr/include/c++/13/string:
 
 /usr/include/features-time64.h:
 
@@ -1239,6 +1230,10 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: /home/yhwong/zkp_lab/protoc
 
 /usr/include/x86_64-linux-gnu/bits/floatn-common.h:
 
+/usr/include/c++/13/limits:
+
+/usr/include/x86_64-linux-gnu/bits/types/wint_t.h:
+
 /usr/include/x86_64-linux-gnu/bits/floatn.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h:
@@ -1334,3 +1329,9 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: /home/yhwong/zkp_lab/protoc
 /usr/include/c++/13/ext/atomicity.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/timer_t.h:
+
+/usr/include/x86_64-linux-gnu/bits/unistd-decl.h:
+
+/usr/include/x86_64-linux-gnu/bits/typesizes.h:
