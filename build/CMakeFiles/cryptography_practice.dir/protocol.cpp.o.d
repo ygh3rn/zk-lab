@@ -219,8 +219,7 @@ CMakeFiles/cryptography_practice.dir/protocol.cpp.o: \
  /usr/local/include/mcl/window_method.hpp \
  /usr/local/include/mcl/g2_def.hpp /usr/local/include/mcl/fp_tower.hpp \
  /usr/local/include/mcl/curve_type.hpp /usr/local/include/mcl/bn_c256.h \
- /usr/local/include/mcl/bn.h /usr/local/include/mcl/bn_c384_256.h \
- /usr/local/include/mcl/bls12_381.hpp /usr/include/c++/13/chrono \
+ /usr/local/include/mcl/bn.h /usr/include/c++/13/chrono \
  /usr/include/c++/13/bits/chrono.h /usr/include/c++/13/ratio \
  /usr/include/c++/13/cstdint /usr/include/c++/13/limits \
  /usr/include/c++/13/ctime /usr/include/c++/13/bits/parse_numbers.h \

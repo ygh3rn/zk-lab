@@ -1,6 +1,6 @@
 #include "kzg.h"
-#include <mcl/bn_c384_256.h>
-#include <mcl/bls12_381.hpp>
+#include <mcl/bn.hpp>
+#include <mcl/bn_c256.h> 
 #include <vector>
 #include <iostream>
 #include <chrono>
