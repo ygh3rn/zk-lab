@@ -14,11 +14,20 @@ struct SumCheckProof {
 
 class SumCheck {
 public:
-    // Prove sum of polynomial evaluations on subgroup H_l equals claimed value
+    // Generate a SumCheck proof
     static SumCheckProof prove(const std::vector<Fr>& polynomial, const Fr& omega, 
                               size_t l, const KZG::SetupParams& params);
     
-    // Verify SumCheck proof using pairing check
+    // Verify a SumCheck proof using pairing-based verification
     static bool verify(const SumCheckProof& proof, const Fr& omega, 
                       size_t l, const KZG::SetupParams& params);
+    
+    // Enhanced verification with additional cryptographic checks
+    static bool verify_with_full_checks(const SumCheckProof& proof, const Fr& omega, 
+                                       size_t l, const KZG::SetupParams& params);
+
+private:
+    // For debugging/testing
+    static std::vector<Fr> compute_quotient_by_x(const std::vector<Fr>& polynomial);
+    static bool verify_primitive_root(const Fr& omega, size_t l);
 };

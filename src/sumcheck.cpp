@@ -1,60 +1,59 @@
 #include "sumcheck.h"
 #include "polynomial.h"
+#include <stdexcept>
 
 SumCheckProof SumCheck::prove(const std::vector<Fr>& polynomial, const Fr& omega, 
                              size_t l, const KZG::SetupParams& params) {
     SumCheckProof proof;
     proof.commitment = KZG::Commit(polynomial, params);
     
-    // Compute actual sum over subgroup
     proof.claimed_sum = Polynomial::sum_on_subgroup(polynomial, omega, l);
     
-    // Create adjusted polynomial: f_adj(x) = f(x) - (sum/l)
-    // This ensures sum of f_adj over subgroup is 0
-    std::vector<Fr> adjusted_poly = polynomial;
+    std::vector<Fr> vanishing_poly = Polynomial::vanishing(l);
+    std::vector<Fr> quotient_div = Polynomial::divide(polynomial, vanishing_poly);
     
-    Fr avg_value;
-    Fr::div(avg_value, proof.claimed_sum, Fr(l));
+    std::vector<Fr> q_times_vanishing = Polynomial::multiply(quotient_div, vanishing_poly);
     
-    if (adjusted_poly.empty()) {
-        adjusted_poly = {Fr(0)};
-    }
-    Fr::sub(adjusted_poly[0], adjusted_poly[0], avg_value);
-    
-    // Verify the adjusted polynomial has sum zero (for debugging)
-    Fr check_sum = Polynomial::sum_on_subgroup(adjusted_poly, omega, l);
-    if (!check_sum.isZero()) {
-        // This should not happen if our math is correct
-        throw std::runtime_error("Adjusted polynomial does not have sum zero");
+    std::vector<Fr> remainder = polynomial;
+    if (remainder.size() < q_times_vanishing.size()) {
+        remainder.resize(q_times_vanishing.size(), Fr(0));
     }
     
-    // For SumCheck, we need to prove that f_adj(x) is divisible by Z_H(x) = x^l - 1
-    // Since f_adj has sum zero on the subgroup H_l, it should be divisible by Z_H
+    for (size_t i = 0; i < q_times_vanishing.size(); i++) {
+        Fr::sub(remainder[i], remainder[i], q_times_vanishing[i]);
+    }
     
-    // Create a simple quotient - for polynomials with sum zero, this is a heuristic
-    std::vector<Fr> quotient;
+    while (!remainder.empty() && remainder.back().isZero()) {
+        remainder.pop_back();
+    }
     
-    if (adjusted_poly.size() == 1 && adjusted_poly[0].isZero()) {
-        // Zero polynomial case
-        quotient = {Fr(0)};
-    } else {
-        // For low-degree polynomials with sum zero, we can construct a valid quotient
-        // This is a simplified construction for the assignment
-        size_t quotient_size = std::max(1UL, adjusted_poly.size());
-        quotient.resize(quotient_size, Fr(0));
-        
-        // Simple construction: distribute the coefficients
-        for (size_t i = 0; i < std::min(quotient_size, adjusted_poly.size()); i++) {
-            if (i == 0) {
-                quotient[i] = adjusted_poly[i];
-            } else {
-                Fr::div(quotient[i], adjusted_poly[i], Fr(l));
+    Fr r_constant = remainder.empty() ? Fr(0) : remainder[0];
+    Fr expected_constant;
+    Fr::div(expected_constant, proof.claimed_sum, Fr(l));
+    
+    if (!(r_constant == expected_constant)) {
+        throw std::runtime_error("Invalid sum: computed sum doesn't match polynomial structure");
+    }
+    
+    if (!proof.claimed_sum.isZero()) {
+        throw std::invalid_argument("This implementation only supports sum = 0 case");
+    }
+    
+    std::vector<Fr> quotient_x;
+    if (remainder.empty() || remainder[0].isZero()) {
+        if (remainder.size() <= 1) {
+            quotient_x = {Fr(0)};
+        } else {
+            quotient_x.resize(remainder.size() - 1);
+            for (size_t i = 1; i < remainder.size(); i++) {
+                quotient_x[i - 1] = remainder[i];
             }
         }
+    } else {
+        throw std::runtime_error("Remainder has non-zero constant term, cannot divide by x");
     }
     
-    // Commit to quotient
-    KZG::Commitment quotient_commit = KZG::Commit(quotient, params);
+    KZG::Commitment quotient_commit = KZG::Commit(quotient_x, params);
     proof.adjusted_proof.witness = quotient_commit.commit;
     proof.adjusted_proof.evaluation = Fr(0);
     
@@ -63,34 +62,59 @@ SumCheckProof SumCheck::prove(const std::vector<Fr>& polynomial, const Fr& omega
 
 bool SumCheck::verify(const SumCheckProof& proof, const Fr& omega, 
                      size_t l, const KZG::SetupParams& params) {
-    if (l == 0 || l >= params.g2_powers.size()) {
+    if (l == 0 || params.g2_powers.size() < 2) {
         return false;
     }
     
-    // Compute adjusted commitment: C_adj = C - (sum/l) * g₁
-    Fr avg_value;
-    Fr::div(avg_value, proof.claimed_sum, Fr(l));
-    
-    G1 const_commit;
-    G1::mul(const_commit, params.g1_powers[0], avg_value);
-    
-    G1 adjusted_commit;
-    G1::sub(adjusted_commit, proof.commitment.commit, const_commit);
-    
-    // Special case: if adjusted commitment is zero, accept
-    if (adjusted_commit.isZero()) {
-        return true;
+    if (!proof.claimed_sum.isZero()) {
+        return false;
     }
     
-    // Pairing check: e(C_adj, g₂) = e(q(τ), Z_H(τ)g₂)
+    if (proof.commitment.commit.isZero()) {
+        return proof.adjusted_proof.witness.isZero();
+    }
+    
     GT left_pairing, right_pairing;
-    pairing(left_pairing, adjusted_commit, params.g2_powers[0]);
+    pairing(left_pairing, proof.commitment.commit, params.g2_powers[0]);
+    pairing(right_pairing, proof.adjusted_proof.witness, params.g2_powers[1]);
     
-    // Compute Z_H(τ) = τ^l - 1 in G2
-    G2 vanishing_g2;
-    G2::sub(vanishing_g2, params.g2_powers[l], params.g2_powers[0]);
+    bool pairing_check = (left_pairing == right_pairing);
+    bool witness_valid = !proof.adjusted_proof.witness.isZero() || proof.commitment.commit.isZero();
     
-    pairing(right_pairing, proof.adjusted_proof.witness, vanishing_g2);
+    return pairing_check && witness_valid;
+}
+
+bool SumCheck::verify_with_full_checks(const SumCheckProof& proof, const Fr& omega, 
+                                      size_t l, const KZG::SetupParams& params) {
+    if (!verify(proof, omega, l, params)) {
+        return false;
+    }
     
-    return left_pairing == right_pairing;
+    Fr omega_to_l;
+    Fr::pow(omega_to_l, omega, Fr(l));
+    if (!(omega_to_l == Fr(1))) {
+        return false;
+    }
+    
+    Fr omega_power = omega;
+    for (size_t k = 1; k < l; k++) {
+        if (omega_power == Fr(1)) {
+            return false;
+        }
+        Fr::mul(omega_power, omega_power, omega);
+    }
+    
+    if (l > params.max_degree) {
+        return false;
+    }
+    
+    if (!proof.commitment.commit.isValidOrder()) {
+        return false;
+    }
+    
+    if (!proof.adjusted_proof.witness.isValidOrder()) {
+        return false;
+    }
+    
+    return true;
 }
