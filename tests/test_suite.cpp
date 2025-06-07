@@ -12,7 +12,7 @@ using namespace mcl;
 using namespace std;
 using namespace std::chrono;
 
-class ProductionTestSuite {
+class TestSuite {
 private:
     size_t passed = 0, total = 0;
     
@@ -398,7 +398,7 @@ int main() {
         initPairing(mcl::BN_SNARK1);
         cout << "Cryptographic parameters initialized successfully" << endl;
         
-        ProductionTestSuite suite;
+        TestSuite suite;
         suite.run_comprehensive_tests();
         
         return 0;
