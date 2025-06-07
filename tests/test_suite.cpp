@@ -1,4 +1,3 @@
-// Production-ready comprehensive test suite
 #include "ntt.h"
 #include "polynomial.h"
 #include "kzg.h"
