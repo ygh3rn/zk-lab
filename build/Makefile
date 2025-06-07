@@ -200,30 +200,6 @@ src/ntt.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/ntt.cpp.s
 .PHONY : src/ntt.cpp.s
 
-src/piop.o: src/piop.cpp.o
-.PHONY : src/piop.o
-
-# target to build an object file
-src/piop.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/piop.cpp.o
-.PHONY : src/piop.cpp.o
-
-src/piop.i: src/piop.cpp.i
-.PHONY : src/piop.i
-
-# target to preprocess a source file
-src/piop.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/piop.cpp.i
-.PHONY : src/piop.cpp.i
-
-src/piop.s: src/piop.cpp.s
-.PHONY : src/piop.s
-
-# target to generate assembly for a file
-src/piop.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/piop.cpp.s
-.PHONY : src/piop.cpp.s
-
 src/polynomial.o: src/polynomial.cpp.o
 .PHONY : src/polynomial.o
 
@@ -247,6 +223,54 @@ src/polynomial.s: src/polynomial.cpp.s
 src/polynomial.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/polynomial.cpp.s
 .PHONY : src/polynomial.cpp.s
+
+src/sumcheck.o: src/sumcheck.cpp.o
+.PHONY : src/sumcheck.o
+
+# target to build an object file
+src/sumcheck.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/sumcheck.cpp.o
+.PHONY : src/sumcheck.cpp.o
+
+src/sumcheck.i: src/sumcheck.cpp.i
+.PHONY : src/sumcheck.i
+
+# target to preprocess a source file
+src/sumcheck.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/sumcheck.cpp.i
+.PHONY : src/sumcheck.cpp.i
+
+src/sumcheck.s: src/sumcheck.cpp.s
+.PHONY : src/sumcheck.s
+
+# target to generate assembly for a file
+src/sumcheck.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/sumcheck.cpp.s
+.PHONY : src/sumcheck.cpp.s
+
+src/zerotest.o: src/zerotest.cpp.o
+.PHONY : src/zerotest.o
+
+# target to build an object file
+src/zerotest.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/zerotest.cpp.o
+.PHONY : src/zerotest.cpp.o
+
+src/zerotest.i: src/zerotest.cpp.i
+.PHONY : src/zerotest.i
+
+# target to preprocess a source file
+src/zerotest.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/zerotest.cpp.i
+.PHONY : src/zerotest.cpp.i
+
+src/zerotest.s: src/zerotest.cpp.s
+.PHONY : src/zerotest.s
+
+# target to generate assembly for a file
+src/zerotest.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/zerotest.cpp.s
+.PHONY : src/zerotest.cpp.s
 
 tests/test_suite.o: tests/test_suite.cpp.o
 .PHONY : tests/test_suite.o
@@ -289,12 +313,15 @@ help:
 	@echo "... src/ntt.o"
 	@echo "... src/ntt.i"
 	@echo "... src/ntt.s"
-	@echo "... src/piop.o"
-	@echo "... src/piop.i"
-	@echo "... src/piop.s"
 	@echo "... src/polynomial.o"
 	@echo "... src/polynomial.i"
 	@echo "... src/polynomial.s"
+	@echo "... src/sumcheck.o"
+	@echo "... src/sumcheck.i"
+	@echo "... src/sumcheck.s"
+	@echo "... src/zerotest.o"
+	@echo "... src/zerotest.i"
+	@echo "... src/zerotest.s"
 	@echo "... tests/test_suite.o"
 	@echo "... tests/test_suite.i"
 	@echo "... tests/test_suite.s"

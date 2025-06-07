@@ -67,7 +67,8 @@ include CMakeFiles/run.dir/compiler_depend.make
 include CMakeFiles/run.dir/progress.make
 
 CMakeFiles/run: test_suite
-	./test_suite
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/yhwong/zkp_lab/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Running cryptography test suite"
+	/home/yhwong/zkp_lab/build/test_suite
 
 run: CMakeFiles/run
 run: CMakeFiles/run.dir/build.make

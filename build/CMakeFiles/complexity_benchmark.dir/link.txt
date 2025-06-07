@@ -1,1 +1,0 @@
-/usr/bin/c++  -O3 -DNDEBUG -march=native CMakeFiles/complexity_benchmark.dir/complexity_benchmark.cpp.o CMakeFiles/complexity_benchmark.dir/kzg.cpp.o -o complexity_benchmark   -L/usr/local/lib  -Wl,-rpath,/usr/local/lib -lmcl 

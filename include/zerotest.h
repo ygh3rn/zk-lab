@@ -13,7 +13,7 @@ struct ZeroTestProof {
 
 class ZeroTest {
 public:
-    // Prove polynomial vanishes on subgroup H_l = {1, ω, ω², ..., ω^(l-1)}
+    // Prove polynomial vanishes on subgroup
     static ZeroTestProof prove(const std::vector<Fr>& polynomial, const Fr& omega, 
                               size_t l, const KZG::SetupParams& params);
     

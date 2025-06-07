@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/protocol.dir/protocol.cpp.o CMakeFiles/protocol.dir/kzg.cpp.o -o protocol   -L/usr/local/lib  -Wl,-rpath,/usr/local/lib -lmcl -lgmp -lgmpxx -lpthread 
