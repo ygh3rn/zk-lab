@@ -1,10 +1,5 @@
-/home/yhwong/zkp_lab/build/CMakeFiles/cryptography_practice.dir
-/home/yhwong/zkp_lab/build/CMakeFiles/testbench.dir
+/home/yhwong/zkp_lab/build/CMakeFiles/test_suite.dir
 /home/yhwong/zkp_lab/build/CMakeFiles/run.dir
 /home/yhwong/zkp_lab/build/CMakeFiles/test.dir
 /home/yhwong/zkp_lab/build/CMakeFiles/edit_cache.dir
 /home/yhwong/zkp_lab/build/CMakeFiles/rebuild_cache.dir
-/home/yhwong/zkp_lab/build/CMakeFiles/list_install_components.dir
-/home/yhwong/zkp_lab/build/CMakeFiles/install.dir
-/home/yhwong/zkp_lab/build/CMakeFiles/install/local.dir
-/home/yhwong/zkp_lab/build/CMakeFiles/install/strip.dir

@@ -95,51 +95,6 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 .PHONY : rebuild_cache/fast
 
-# Special rule for the target list_install_components
-list_install_components:
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Unspecified\""
-.PHONY : list_install_components
-
-# Special rule for the target list_install_components
-list_install_components/fast: list_install_components
-.PHONY : list_install_components/fast
-
-# Special rule for the target install
-install: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
-	/usr/bin/cmake -P cmake_install.cmake
-.PHONY : install
-
-# Special rule for the target install
-install/fast: preinstall/fast
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
-	/usr/bin/cmake -P cmake_install.cmake
-.PHONY : install/fast
-
-# Special rule for the target install/local
-install/local: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
-	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
-.PHONY : install/local
-
-# Special rule for the target install/local
-install/local/fast: preinstall/fast
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
-	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
-.PHONY : install/local/fast
-
-# Special rule for the target install/strip
-install/strip: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
-	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
-.PHONY : install/strip
-
-# Special rule for the target install/strip
-install/strip/fast: preinstall/fast
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
-	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
-.PHONY : install/strip/fast
-
 # The main all target
 all: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yhwong/zkp_lab/build/CMakeFiles /home/yhwong/zkp_lab/build//CMakeFiles/progress.marks
@@ -172,30 +127,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named cryptography_practice
+# Target rules for targets named test_suite
 
 # Build rule for target.
-cryptography_practice: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 cryptography_practice
-.PHONY : cryptography_practice
+test_suite: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_suite
+.PHONY : test_suite
 
 # fast build rule for target.
-cryptography_practice/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/cryptography_practice.dir/build.make CMakeFiles/cryptography_practice.dir/build
-.PHONY : cryptography_practice/fast
-
-#=============================================================================
-# Target rules for targets named testbench
-
-# Build rule for target.
-testbench: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 testbench
-.PHONY : testbench
-
-# fast build rule for target.
-testbench/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/testbench.dir/build.make CMakeFiles/testbench.dir/build
-.PHONY : testbench/fast
+test_suite/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/build
+.PHONY : test_suite/fast
 
 #=============================================================================
 # Target rules for targets named run
@@ -210,80 +152,125 @@ run/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run.dir/build.make CMakeFiles/run.dir/build
 .PHONY : run/fast
 
-kzg.o: kzg.cpp.o
-.PHONY : kzg.o
+src/kzg.o: src/kzg.cpp.o
+.PHONY : src/kzg.o
 
 # target to build an object file
-kzg.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/cryptography_practice.dir/build.make CMakeFiles/cryptography_practice.dir/kzg.cpp.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/testbench.dir/build.make CMakeFiles/testbench.dir/kzg.cpp.o
-.PHONY : kzg.cpp.o
+src/kzg.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/kzg.cpp.o
+.PHONY : src/kzg.cpp.o
 
-kzg.i: kzg.cpp.i
-.PHONY : kzg.i
+src/kzg.i: src/kzg.cpp.i
+.PHONY : src/kzg.i
 
 # target to preprocess a source file
-kzg.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/cryptography_practice.dir/build.make CMakeFiles/cryptography_practice.dir/kzg.cpp.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/testbench.dir/build.make CMakeFiles/testbench.dir/kzg.cpp.i
-.PHONY : kzg.cpp.i
+src/kzg.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/kzg.cpp.i
+.PHONY : src/kzg.cpp.i
 
-kzg.s: kzg.cpp.s
-.PHONY : kzg.s
+src/kzg.s: src/kzg.cpp.s
+.PHONY : src/kzg.s
 
 # target to generate assembly for a file
-kzg.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/cryptography_practice.dir/build.make CMakeFiles/cryptography_practice.dir/kzg.cpp.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/testbench.dir/build.make CMakeFiles/testbench.dir/kzg.cpp.s
-.PHONY : kzg.cpp.s
+src/kzg.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/kzg.cpp.s
+.PHONY : src/kzg.cpp.s
 
-protocol.o: protocol.cpp.o
-.PHONY : protocol.o
+src/ntt.o: src/ntt.cpp.o
+.PHONY : src/ntt.o
 
 # target to build an object file
-protocol.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/cryptography_practice.dir/build.make CMakeFiles/cryptography_practice.dir/protocol.cpp.o
-.PHONY : protocol.cpp.o
+src/ntt.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/ntt.cpp.o
+.PHONY : src/ntt.cpp.o
 
-protocol.i: protocol.cpp.i
-.PHONY : protocol.i
+src/ntt.i: src/ntt.cpp.i
+.PHONY : src/ntt.i
 
 # target to preprocess a source file
-protocol.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/cryptography_practice.dir/build.make CMakeFiles/cryptography_practice.dir/protocol.cpp.i
-.PHONY : protocol.cpp.i
+src/ntt.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/ntt.cpp.i
+.PHONY : src/ntt.cpp.i
 
-protocol.s: protocol.cpp.s
-.PHONY : protocol.s
+src/ntt.s: src/ntt.cpp.s
+.PHONY : src/ntt.s
 
 # target to generate assembly for a file
-protocol.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/cryptography_practice.dir/build.make CMakeFiles/cryptography_practice.dir/protocol.cpp.s
-.PHONY : protocol.cpp.s
+src/ntt.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/ntt.cpp.s
+.PHONY : src/ntt.cpp.s
 
-testbench.o: testbench.cpp.o
-.PHONY : testbench.o
+src/piop.o: src/piop.cpp.o
+.PHONY : src/piop.o
 
 # target to build an object file
-testbench.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/testbench.dir/build.make CMakeFiles/testbench.dir/testbench.cpp.o
-.PHONY : testbench.cpp.o
+src/piop.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/piop.cpp.o
+.PHONY : src/piop.cpp.o
 
-testbench.i: testbench.cpp.i
-.PHONY : testbench.i
+src/piop.i: src/piop.cpp.i
+.PHONY : src/piop.i
 
 # target to preprocess a source file
-testbench.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/testbench.dir/build.make CMakeFiles/testbench.dir/testbench.cpp.i
-.PHONY : testbench.cpp.i
+src/piop.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/piop.cpp.i
+.PHONY : src/piop.cpp.i
 
-testbench.s: testbench.cpp.s
-.PHONY : testbench.s
+src/piop.s: src/piop.cpp.s
+.PHONY : src/piop.s
 
 # target to generate assembly for a file
-testbench.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/testbench.dir/build.make CMakeFiles/testbench.dir/testbench.cpp.s
-.PHONY : testbench.cpp.s
+src/piop.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/piop.cpp.s
+.PHONY : src/piop.cpp.s
+
+src/polynomial.o: src/polynomial.cpp.o
+.PHONY : src/polynomial.o
+
+# target to build an object file
+src/polynomial.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/polynomial.cpp.o
+.PHONY : src/polynomial.cpp.o
+
+src/polynomial.i: src/polynomial.cpp.i
+.PHONY : src/polynomial.i
+
+# target to preprocess a source file
+src/polynomial.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/polynomial.cpp.i
+.PHONY : src/polynomial.cpp.i
+
+src/polynomial.s: src/polynomial.cpp.s
+.PHONY : src/polynomial.s
+
+# target to generate assembly for a file
+src/polynomial.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/src/polynomial.cpp.s
+.PHONY : src/polynomial.cpp.s
+
+tests/test_suite.o: tests/test_suite.cpp.o
+.PHONY : tests/test_suite.o
+
+# target to build an object file
+tests/test_suite.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/tests/test_suite.cpp.o
+.PHONY : tests/test_suite.cpp.o
+
+tests/test_suite.i: tests/test_suite.cpp.i
+.PHONY : tests/test_suite.i
+
+# target to preprocess a source file
+tests/test_suite.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/tests/test_suite.cpp.i
+.PHONY : tests/test_suite.cpp.i
+
+tests/test_suite.s: tests/test_suite.cpp.s
+.PHONY : tests/test_suite.s
+
+# target to generate assembly for a file
+tests/test_suite.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/tests/test_suite.cpp.s
+.PHONY : tests/test_suite.cpp.s
 
 # Help Target
 help:
@@ -292,24 +279,25 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
-	@echo "... install"
-	@echo "... install/local"
-	@echo "... install/strip"
-	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... test"
 	@echo "... run"
-	@echo "... cryptography_practice"
-	@echo "... testbench"
-	@echo "... kzg.o"
-	@echo "... kzg.i"
-	@echo "... kzg.s"
-	@echo "... protocol.o"
-	@echo "... protocol.i"
-	@echo "... protocol.s"
-	@echo "... testbench.o"
-	@echo "... testbench.i"
-	@echo "... testbench.s"
+	@echo "... test_suite"
+	@echo "... src/kzg.o"
+	@echo "... src/kzg.i"
+	@echo "... src/kzg.s"
+	@echo "... src/ntt.o"
+	@echo "... src/ntt.i"
+	@echo "... src/ntt.s"
+	@echo "... src/piop.o"
+	@echo "... src/piop.i"
+	@echo "... src/piop.s"
+	@echo "... src/polynomial.o"
+	@echo "... src/polynomial.i"
+	@echo "... src/polynomial.s"
+	@echo "... tests/test_suite.o"
+	@echo "... tests/test_suite.i"
+	@echo "... tests/test_suite.s"
 .PHONY : help
 
 

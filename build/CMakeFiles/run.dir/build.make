@@ -66,8 +66,8 @@ include CMakeFiles/run.dir/compiler_depend.make
 # Include the progress variables for this target.
 include CMakeFiles/run.dir/progress.make
 
-CMakeFiles/run: cryptography_practice
-	./cryptography_practice
+CMakeFiles/run: test_suite
+	./test_suite
 
 run: CMakeFiles/run
 run: CMakeFiles/run.dir/build.make

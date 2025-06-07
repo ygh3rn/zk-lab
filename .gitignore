@@ -1,0 +1,19 @@
+# Build artifacts
+build/
+*.o
+*.a
+*.so
+
+# Executables  
+test_suite
+cryptography_practice
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db

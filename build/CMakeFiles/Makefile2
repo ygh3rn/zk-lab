@@ -63,8 +63,7 @@ CMAKE_BINARY_DIR = /home/yhwong/zkp_lab/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/cryptography_practice.dir/all
-all: CMakeFiles/testbench.dir/all
+all: CMakeFiles/test_suite.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -72,68 +71,41 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/cryptography_practice.dir/clean
-clean: CMakeFiles/testbench.dir/clean
+clean: CMakeFiles/test_suite.dir/clean
 clean: CMakeFiles/run.dir/clean
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/cryptography_practice.dir
+# Target rules for target CMakeFiles/test_suite.dir
 
 # All Build rule for target.
-CMakeFiles/cryptography_practice.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/cryptography_practice.dir/build.make CMakeFiles/cryptography_practice.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/cryptography_practice.dir/build.make CMakeFiles/cryptography_practice.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yhwong/zkp_lab/build/CMakeFiles --progress-num=1,2,3 "Built target cryptography_practice"
-.PHONY : CMakeFiles/cryptography_practice.dir/all
+CMakeFiles/test_suite.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yhwong/zkp_lab/build/CMakeFiles --progress-num=1,2,3,4,5,6 "Built target test_suite"
+.PHONY : CMakeFiles/test_suite.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/cryptography_practice.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yhwong/zkp_lab/build/CMakeFiles 3
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/cryptography_practice.dir/all
+CMakeFiles/test_suite.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yhwong/zkp_lab/build/CMakeFiles 6
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/test_suite.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yhwong/zkp_lab/build/CMakeFiles 0
-.PHONY : CMakeFiles/cryptography_practice.dir/rule
+.PHONY : CMakeFiles/test_suite.dir/rule
 
 # Convenience name for target.
-cryptography_practice: CMakeFiles/cryptography_practice.dir/rule
-.PHONY : cryptography_practice
+test_suite: CMakeFiles/test_suite.dir/rule
+.PHONY : test_suite
 
 # clean rule for target.
-CMakeFiles/cryptography_practice.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/cryptography_practice.dir/build.make CMakeFiles/cryptography_practice.dir/clean
-.PHONY : CMakeFiles/cryptography_practice.dir/clean
-
-#=============================================================================
-# Target rules for target CMakeFiles/testbench.dir
-
-# All Build rule for target.
-CMakeFiles/testbench.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/testbench.dir/build.make CMakeFiles/testbench.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/testbench.dir/build.make CMakeFiles/testbench.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yhwong/zkp_lab/build/CMakeFiles --progress-num=4,5,6 "Built target testbench"
-.PHONY : CMakeFiles/testbench.dir/all
-
-# Build rule for subdir invocation for target.
-CMakeFiles/testbench.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yhwong/zkp_lab/build/CMakeFiles 3
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/testbench.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yhwong/zkp_lab/build/CMakeFiles 0
-.PHONY : CMakeFiles/testbench.dir/rule
-
-# Convenience name for target.
-testbench: CMakeFiles/testbench.dir/rule
-.PHONY : testbench
-
-# clean rule for target.
-CMakeFiles/testbench.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/testbench.dir/build.make CMakeFiles/testbench.dir/clean
-.PHONY : CMakeFiles/testbench.dir/clean
+CMakeFiles/test_suite.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_suite.dir/build.make CMakeFiles/test_suite.dir/clean
+.PHONY : CMakeFiles/test_suite.dir/clean
 
 #=============================================================================
 # Target rules for target CMakeFiles/run.dir
 
 # All Build rule for target.
-CMakeFiles/run.dir/all: CMakeFiles/cryptography_practice.dir/all
+CMakeFiles/run.dir/all: CMakeFiles/test_suite.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run.dir/build.make CMakeFiles/run.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/run.dir/build.make CMakeFiles/run.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/yhwong/zkp_lab/build/CMakeFiles --progress-num= "Built target run"
@@ -141,7 +113,7 @@ CMakeFiles/run.dir/all: CMakeFiles/cryptography_practice.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/run.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yhwong/zkp_lab/build/CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/yhwong/zkp_lab/build/CMakeFiles 6
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/run.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/yhwong/zkp_lab/build/CMakeFiles 0
 .PHONY : CMakeFiles/run.dir/rule
