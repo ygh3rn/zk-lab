@@ -38,13 +38,13 @@ public:
         initPairing(BN_SNARK1);
         KZG::SetupParams params = KZG::Setup(512);
         
-        test_ntt_rigorous();
-        test_polynomial_rigorous();
-        test_kzg_rigorous(params);
-        test_kzg_batch_rigorous(params);
-        test_zerotest_rigorous(params);
-        test_sumcheck_rigorous(params);
-        test_security_rigorous(params);
+        test_ntt();
+        test_polynomial();
+        test_kzg(params);
+        test_kzg_batch(params);
+        test_zerotest(params);
+        test_sumcheck(params);
+        test_security(params);
         test_edge_cases(params);
         
         cout << "\nBenchmarks:" << endl;
@@ -55,7 +55,7 @@ public:
     }
     
 private:
-    void test_ntt_rigorous() {
+    void test_ntt() {
         bool correctness = true, primitivity = true, edge_cases = true;
         
         // Test various sizes and verify mathematical properties
@@ -115,7 +115,7 @@ private:
         test("NTT edge cases", edge_cases);
     }
     
-    void test_polynomial_rigorous() {
+    void test_polynomial() {
         bool mult_correct = true, interp_correct = true, div_correct = true;
         
         // Test polynomial operations with various degrees
@@ -202,7 +202,7 @@ private:
         test("Polynomial division", div_correct);
     }
     
-    void test_kzg_rigorous(const KZG::SetupParams& params) {
+    void test_kzg(const KZG::SetupParams& params) {
         bool completeness = true, eval_correct = true, pairing_correct = true;
         
         // Test with various polynomial degrees and edge cases
@@ -261,7 +261,7 @@ private:
         test("KZG pairing equation", pairing_correct);
     }
     
-    void test_kzg_batch_rigorous(const KZG::SetupParams& params) {
+    void test_kzg_batch(const KZG::SetupParams& params) {
         bool correctness = true, consistency = true, edge_cases = true;
         
         // Test various batch sizes and polynomial types
@@ -334,7 +334,7 @@ private:
         test("KZG batch edge cases", edge_cases);
     }
     
-    void test_zerotest_rigorous(const KZG::SetupParams& params) {
+    void test_zerotest(const KZG::SetupParams& params) {
         bool soundness = true, completeness = true, math_correct = true;
         
         vector<size_t> subgroup_sizes = {4, 8, 16, 32, 64};
@@ -403,7 +403,7 @@ private:
         test("ZeroTest mathematics", math_correct);
     }
     
-    void test_sumcheck_rigorous(const KZG::SetupParams& params) {
+    void test_sumcheck(const KZG::SetupParams& params) {
         bool correctness = true, soundness = true, math_verify = true;
         
         vector<size_t> subgroup_sizes = {8, 16, 32};
@@ -464,7 +464,7 @@ private:
         test("SumCheck mathematics", math_verify);
     }
     
-    void test_security_rigorous(const KZG::SetupParams& params) {
+    void test_security(const KZG::SetupParams& params) {
         bool binding = true, hiding = true, knowledge_sound = true;
         
         // Test binding with many different polynomials
