@@ -60,42 +60,22 @@ Fr NTT::find_primitive_root(size_t n) {
     if (n == 0 || (n & (n - 1)) != 0) {
         throw invalid_argument("n must be power of 2");
     }
-    
-    Fr field_order_minus_one = Fr(-1);
-    Fr exponent;
-    Fr::div(exponent, field_order_minus_one, Fr(n));
-    
-    vector<int> candidates = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
-    
-    for (int base : candidates) {
-        Fr candidate = Fr(base);
-        Fr root;
-        Fr::pow(root, candidate, exponent);
-        
-        Fr test_n;
-        Fr::pow(test_n, root, Fr(n));
-        
-        if (test_n == Fr(1)) {
-            bool is_primitive = true;
-            
-            for (size_t divisor = 2; divisor < n; divisor++) {
-                if (n % divisor == 0) {
-                    Fr test_order;
-                    Fr::pow(test_order, root, Fr(divisor));
-                    if (test_order == Fr(1)) {
-                        is_primitive = false;
-                        break;
-                    }
-                }
-            }
-                    
-            if (is_primitive) {
-                return root;
-            }
-        }
+    if (n == 1) {
+        return Fr(1);
     }
     
-    throw runtime_error("Failed to find primitive nth root of unity");
+    Fr exponent = Fr(-1) / Fr(n);
+    Fr half = Fr(n / 2);
+
+    for (int b = 2; ; ++b) {
+        Fr root, test;
+        Fr::pow(root, Fr(b), exponent);
+        Fr::pow(test, root, half);
+
+        if (test == Fr(-1)) {
+            return root;
+        }
+    }
 }
 
 Fr NTT::mod_inverse(const Fr& a) {
