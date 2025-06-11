@@ -2,12 +2,12 @@
 #include <stdexcept>
 #include <algorithm>
 
-std::vector<Fr> NTT::transform(const std::vector<Fr>& a, const Fr& root, size_t n) {
+vector<Fr> NTT::transform(const vector<Fr>& a, const Fr& root, size_t n) {
     if (n == 0 || (n & (n - 1)) != 0) {
-        throw std::invalid_argument("NTT size must be power of 2");
+        throw invalid_argument("NTT size must be power of 2");
     }
     
-    std::vector<Fr> result = a;
+    vector<Fr> result = a;
     result.resize(n, Fr(0));
     
     for (size_t i = 1, j = 0; i < n; i++) {
@@ -17,7 +17,7 @@ std::vector<Fr> NTT::transform(const std::vector<Fr>& a, const Fr& root, size_t 
         }
         j ^= bit;
         if (i < j) {
-            std::swap(result[i], result[j]);
+            swap(result[i], result[j]);
         }
     }
     
@@ -44,9 +44,9 @@ std::vector<Fr> NTT::transform(const std::vector<Fr>& a, const Fr& root, size_t 
     return result;
 }
 
-std::vector<Fr> NTT::inverse_transform(const std::vector<Fr>& a, const Fr& root, size_t n) {
+vector<Fr> NTT::inverse_transform(const vector<Fr>& a, const Fr& root, size_t n) {
     Fr inv_root = mod_inverse(root);
-    std::vector<Fr> result = transform(a, inv_root, n);
+    vector<Fr> result = transform(a, inv_root, n);
     
     Fr inv_n = mod_inverse(Fr(n));
     for (auto& x : result) {
@@ -58,14 +58,14 @@ std::vector<Fr> NTT::inverse_transform(const std::vector<Fr>& a, const Fr& root,
 
 Fr NTT::find_primitive_root(size_t n) {
     if (n == 0 || (n & (n - 1)) != 0) {
-        throw std::invalid_argument("n must be power of 2");
+        throw invalid_argument("n must be power of 2");
     }
     
     Fr field_order_minus_one = Fr(-1);
     Fr exponent;
     Fr::div(exponent, field_order_minus_one, Fr(n));
     
-    std::vector<int> candidates = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
+    vector<int> candidates = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
     
     for (int base : candidates) {
         Fr candidate = Fr(base);
@@ -95,7 +95,7 @@ Fr NTT::find_primitive_root(size_t n) {
         }
     }
     
-    throw std::runtime_error("Failed to find primitive nth root of unity");
+    throw runtime_error("Failed to find primitive nth root of unity");
 }
 
 Fr NTT::mod_inverse(const Fr& a) {

@@ -5,6 +5,7 @@
 #include <vector>
 
 using namespace mcl;
+using namespace std;
 
 struct ZeroTestProof {
     KZG::Commitment commitment;
@@ -14,7 +15,7 @@ struct ZeroTestProof {
 class ZeroTest {
 public:
     // Generate a ZeroTest proof
-    static ZeroTestProof prove(const std::vector<Fr>& polynomial, const Fr& omega, 
+    static ZeroTestProof prove(const vector<Fr>& polynomial, const Fr& omega, 
                               size_t l, const KZG::SetupParams& params);
     
     // Verify a ZeroTest proof using pairing-based verification
@@ -27,7 +28,7 @@ public:
 
 private:
     // For debugging/testing
-    static bool verify_division(const std::vector<Fr>& dividend, 
-                               const std::vector<Fr>& divisor,
-                               const std::vector<Fr>& quotient);
+    static bool verify_division(const vector<Fr>& dividend, 
+                               const vector<Fr>& divisor,
+                               const vector<Fr>& quotient);
 };

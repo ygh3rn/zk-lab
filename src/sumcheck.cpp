@@ -2,19 +2,19 @@
 #include "polynomial.h"
 #include <stdexcept>
 
-SumCheckProof SumCheck::prove(const std::vector<Fr>& polynomial, const Fr& omega, 
+SumCheckProof SumCheck::prove(const vector<Fr>& polynomial, const Fr& omega, 
                              size_t l, const KZG::SetupParams& params) {
     SumCheckProof proof;
     proof.commitment = KZG::Commit(polynomial, params);
     
     proof.claimed_sum = Polynomial::sum_on_subgroup(polynomial, omega, l);
     
-    std::vector<Fr> vanishing_poly = Polynomial::vanishing(l);
-    std::vector<Fr> quotient_div = Polynomial::divide(polynomial, vanishing_poly);
+    vector<Fr> vanishing_poly = Polynomial::vanishing(l);
+    vector<Fr> quotient_div = Polynomial::divide(polynomial, vanishing_poly);
     
-    std::vector<Fr> q_times_vanishing = Polynomial::multiply(quotient_div, vanishing_poly);
+    vector<Fr> q_times_vanishing = Polynomial::multiply(quotient_div, vanishing_poly);
     
-    std::vector<Fr> remainder = polynomial;
+    vector<Fr> remainder = polynomial;
     if (remainder.size() < q_times_vanishing.size()) {
         remainder.resize(q_times_vanishing.size(), Fr(0));
     }
@@ -32,14 +32,14 @@ SumCheckProof SumCheck::prove(const std::vector<Fr>& polynomial, const Fr& omega
     Fr::div(expected_constant, proof.claimed_sum, Fr(l));
     
     if (!(r_constant == expected_constant)) {
-        throw std::runtime_error("Invalid sum: computed sum doesn't match polynomial structure");
+        throw runtime_error("Invalid sum: computed sum doesn't match polynomial structure");
     }
     
     if (!proof.claimed_sum.isZero()) {
-        throw std::invalid_argument("This implementation only supports sum = 0 case");
+        throw invalid_argument("This implementation only supports sum = 0 case");
     }
     
-    std::vector<Fr> quotient_x;
+    vector<Fr> quotient_x;
     if (remainder.empty() || remainder[0].isZero()) {
         if (remainder.size() <= 1) {
             quotient_x = {Fr(0)};
@@ -50,7 +50,7 @@ SumCheckProof SumCheck::prove(const std::vector<Fr>& polynomial, const Fr& omega
             }
         }
     } else {
-        throw std::runtime_error("Remainder has non-zero constant term, cannot divide by x");
+        throw runtime_error("Remainder has non-zero constant term, cannot divide by x");
     }
     
     KZG::Commitment quotient_commit = KZG::Commit(quotient_x, params);

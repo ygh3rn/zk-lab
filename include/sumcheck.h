@@ -5,6 +5,7 @@
 #include <vector>
 
 using namespace mcl;
+using namespace std;
 
 struct SumCheckProof {
     KZG::Commitment commitment;
@@ -15,7 +16,7 @@ struct SumCheckProof {
 class SumCheck {
 public:
     // Generate a SumCheck proof
-    static SumCheckProof prove(const std::vector<Fr>& polynomial, const Fr& omega, 
+    static SumCheckProof prove(const vector<Fr>& polynomial, const Fr& omega, 
                               size_t l, const KZG::SetupParams& params);
     
     // Verify a SumCheck proof using pairing-based verification
@@ -28,6 +29,6 @@ public:
 
 private:
     // For debugging/testing
-    static std::vector<Fr> compute_quotient_by_x(const std::vector<Fr>& polynomial);
+    static vector<Fr> compute_quotient_by_x(const vector<Fr>& polynomial);
     static bool verify_primitive_root(const Fr& omega, size_t l);
 };

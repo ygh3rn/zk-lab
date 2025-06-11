@@ -2,7 +2,7 @@
 #include "polynomial.h"
 #include <stdexcept>
 
-ZeroTestProof ZeroTest::prove(const std::vector<Fr>& polynomial, const Fr& omega, 
+ZeroTestProof ZeroTest::prove(const vector<Fr>& polynomial, const Fr& omega, 
                              size_t l, const KZG::SetupParams& params) {
     ZeroTestProof proof;
     proof.commitment = KZG::Commit(polynomial, params);
@@ -11,15 +11,15 @@ ZeroTestProof ZeroTest::prove(const std::vector<Fr>& polynomial, const Fr& omega
     for (size_t i = 0; i < l; i++) {
         Fr eval = Polynomial::evaluate(polynomial, omega_power);
         if (!eval.isZero()) {
-            throw std::invalid_argument("Polynomial does not vanish at ω^" + std::to_string(i));
+            throw invalid_argument("Polynomial does not vanish at ω^" + to_string(i));
         }
         Fr::mul(omega_power, omega_power, omega);
     }
     
-    std::vector<Fr> vanishing_poly = Polynomial::vanishing(l);
-    std::vector<Fr> quotient = Polynomial::divide(polynomial, vanishing_poly);
+    vector<Fr> vanishing_poly = Polynomial::vanishing(l);
+    vector<Fr> quotient = Polynomial::divide(polynomial, vanishing_poly);
     
-    std::vector<Fr> product = Polynomial::multiply(quotient, vanishing_poly);
+    vector<Fr> product = Polynomial::multiply(quotient, vanishing_poly);
     
     if (product.size() != polynomial.size()) {
         if (product.size() < polynomial.size()) {
@@ -27,7 +27,7 @@ ZeroTestProof ZeroTest::prove(const std::vector<Fr>& polynomial, const Fr& omega
         } else {
             for (size_t i = polynomial.size(); i < product.size(); i++) {
                 if (!product[i].isZero()) {
-                    throw std::runtime_error("Polynomial division has non-zero remainder");
+                    throw runtime_error("Polynomial division has non-zero remainder");
                 }
             }
         }
@@ -35,7 +35,7 @@ ZeroTestProof ZeroTest::prove(const std::vector<Fr>& polynomial, const Fr& omega
     
     for (size_t i = 0; i < polynomial.size(); i++) {
         if (!(polynomial[i] == product[i])) {
-            throw std::runtime_error("Polynomial division verification failed");
+            throw runtime_error("Polynomial division verification failed");
         }
     }
     
@@ -106,10 +106,10 @@ bool ZeroTest::verify_with_full_checks(const ZeroTestProof& proof, const Fr& ome
 }
 
 // Helper function to verify polynomial division (for testing/debugging)
-bool ZeroTest::verify_division(const std::vector<Fr>& dividend, 
-                              const std::vector<Fr>& divisor,
-                              const std::vector<Fr>& quotient) {
-    std::vector<Fr> product = Polynomial::multiply(quotient, divisor);
+bool ZeroTest::verify_division(const vector<Fr>& dividend, 
+                              const vector<Fr>& divisor,
+                              const vector<Fr>& quotient) {
+    vector<Fr> product = Polynomial::multiply(quotient, divisor);
     
     if (product.size() != dividend.size()) {
         if (product.size() < dividend.size()) {

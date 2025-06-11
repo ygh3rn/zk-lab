@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <cassert>
 
-Fr Polynomial::evaluate(const std::vector<Fr>& coefficients, const Fr& x) {
+Fr Polynomial::evaluate(const vector<Fr>& coefficients, const Fr& x) {
     if (coefficients.empty()) {
         return Fr(0);
     }
@@ -17,7 +17,7 @@ Fr Polynomial::evaluate(const std::vector<Fr>& coefficients, const Fr& x) {
     return result;
 }
 
-std::vector<Fr> Polynomial::multiply(const std::vector<Fr>& a, const std::vector<Fr>& b) {
+vector<Fr> Polynomial::multiply(const vector<Fr>& a, const vector<Fr>& b) {
     if (a.empty() || b.empty()) {
         return {};
     }
@@ -28,20 +28,20 @@ std::vector<Fr> Polynomial::multiply(const std::vector<Fr>& a, const std::vector
     
     Fr root = NTT::find_primitive_root(n);
     
-    std::vector<Fr> fa = NTT::transform(a, root, n);
-    std::vector<Fr> fb = NTT::transform(b, root, n);
+    vector<Fr> fa = NTT::transform(a, root, n);
+    vector<Fr> fb = NTT::transform(b, root, n);
     
     for (size_t i = 0; i < n; i++) {
         Fr::mul(fa[i], fa[i], fb[i]);
     }
     
-    std::vector<Fr> result = NTT::inverse_transform(fa, root, n);
+    vector<Fr> result = NTT::inverse_transform(fa, root, n);
     result.resize(result_size);
     
     return result;
 }
 
-std::vector<Fr> Polynomial::divide_by_linear(const std::vector<Fr>& dividend, const Fr& z) {
+vector<Fr> Polynomial::divide_by_linear(const vector<Fr>& dividend, const Fr& z) {
     if (dividend.empty()) {
         return {};
     }
@@ -50,7 +50,7 @@ std::vector<Fr> Polynomial::divide_by_linear(const std::vector<Fr>& dividend, co
         return {};
     }
     
-    std::vector<Fr> quotient(dividend.size() - 1);
+    vector<Fr> quotient(dividend.size() - 1);
     quotient[quotient.size() - 1] = dividend.back();
     
     for (int i = quotient.size() - 2; i >= 0; i--) {
@@ -62,21 +62,21 @@ std::vector<Fr> Polynomial::divide_by_linear(const std::vector<Fr>& dividend, co
     return quotient;
 }
 
-std::vector<Fr> Polynomial::divide(const std::vector<Fr>& dividend, const std::vector<Fr>& divisor) {
+vector<Fr> Polynomial::divide(const vector<Fr>& dividend, const vector<Fr>& divisor) {
     if (divisor.empty()) {
-        throw std::invalid_argument("Divisor cannot be empty");
+        throw invalid_argument("Divisor cannot be empty");
     }
     
-    std::vector<Fr> clean_divisor = divisor;
+    vector<Fr> clean_divisor = divisor;
     while (!clean_divisor.empty() && clean_divisor.back().isZero()) {
         clean_divisor.pop_back();
     }
     
     if (clean_divisor.empty() || clean_divisor.back().isZero()) {
-        throw std::invalid_argument("Divisor cannot be zero polynomial");
+        throw invalid_argument("Divisor cannot be zero polynomial");
     }
     
-    std::vector<Fr> clean_dividend = dividend;
+    vector<Fr> clean_dividend = dividend;
     while (!clean_dividend.empty() && clean_dividend.back().isZero()) {
         clean_dividend.pop_back();
     }
@@ -90,8 +90,8 @@ std::vector<Fr> Polynomial::divide(const std::vector<Fr>& dividend, const std::v
     }
     
     size_t quotient_degree = clean_dividend.size() - clean_divisor.size();
-    std::vector<Fr> quotient(quotient_degree + 1, Fr(0));
-    std::vector<Fr> remainder = clean_dividend;
+    vector<Fr> quotient(quotient_degree + 1, Fr(0));
+    vector<Fr> remainder = clean_dividend;
     
     Fr leading_coeff_inv;
     Fr::inv(leading_coeff_inv, clean_divisor.back());
@@ -118,17 +118,17 @@ std::vector<Fr> Polynomial::divide(const std::vector<Fr>& dividend, const std::v
     return quotient;
 }
 
-std::vector<Fr> Polynomial::interpolate_lagrange(const std::vector<Fr>& x_vals, const std::vector<Fr>& y_vals) {
+vector<Fr> Polynomial::interpolate_lagrange(const vector<Fr>& x_vals, const vector<Fr>& y_vals) {
     assert(x_vals.size() == y_vals.size());
     size_t n = x_vals.size();
     
     if (n == 0) return {};
     if (n == 1) return {y_vals[0]};
     
-    std::vector<Fr> result(n, Fr(0));
+    vector<Fr> result(n, Fr(0));
     
     for (size_t i = 0; i < n; i++) {
-        std::vector<Fr> basis = {Fr(1)};
+        vector<Fr> basis = {Fr(1)};
         
         for (size_t j = 0; j < n; j++) {
             if (i != j) {
@@ -137,7 +137,7 @@ std::vector<Fr> Polynomial::interpolate_lagrange(const std::vector<Fr>& x_vals, 
                 Fr inv_denom;
                 Fr::inv(inv_denom, denominator);
                 
-                std::vector<Fr> linear = {Fr(0), Fr(1)};
+                vector<Fr> linear = {Fr(0), Fr(1)};
                 Fr::sub(linear[0], linear[0], x_vals[j]);
                 
                 basis = multiply(basis, linear);
@@ -158,7 +158,7 @@ std::vector<Fr> Polynomial::interpolate_lagrange(const std::vector<Fr>& x_vals, 
     return result;
 }
 
-std::vector<Fr> Polynomial::interpolate_ntt(const std::vector<Fr>& x_vals, const std::vector<Fr>& y_vals) {
+vector<Fr> Polynomial::interpolate_ntt(const vector<Fr>& x_vals, const vector<Fr>& y_vals) {
     size_t n = x_vals.size();
     if (n == 0) return {};
     
@@ -183,22 +183,22 @@ std::vector<Fr> Polynomial::interpolate_ntt(const std::vector<Fr>& x_vals, const
     return interpolate_lagrange(x_vals, y_vals);
 }
 
-std::vector<Fr> Polynomial::random(size_t degree) {
-    std::vector<Fr> poly(degree + 1);
+vector<Fr> Polynomial::random(size_t degree) {
+    vector<Fr> poly(degree + 1);
     for (auto& coeff : poly) {
         coeff.setByCSPRNG();
     }
     return poly;
 }
 
-std::vector<Fr> Polynomial::vanishing(size_t l) {
-    std::vector<Fr> result(l + 1, Fr(0));
+vector<Fr> Polynomial::vanishing(size_t l) {
+    vector<Fr> result(l + 1, Fr(0));
     result[0] = Fr(-1);
     result[l] = Fr(1);
     return result;
 }
 
-Fr Polynomial::sum_on_subgroup(const std::vector<Fr>& poly, const Fr& omega, size_t l) {
+Fr Polynomial::sum_on_subgroup(const vector<Fr>& poly, const Fr& omega, size_t l) {
     Fr sum = Fr(0);
     Fr omega_power = Fr(1);
     
