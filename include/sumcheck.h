@@ -8,27 +8,29 @@ using namespace mcl;
 using namespace std;
 
 struct SumCheckProof {
-    KZG::Commitment commitment;
-    KZG::Proof adjusted_proof;
+    KZG::Commitment f_commitment;
+    KZG::Commitment q_commitment;
+    Fr challenge;
+    KZG::Proof f_eval_proof;
+    KZG::Proof q_eval_proof;
+    Fr f_eval;
+    Fr q_eval;
     Fr claimed_sum;
 };
 
 class SumCheck {
 public:
-    // Generate a SumCheck proof
-    static SumCheckProof prove(const vector<Fr>& polynomial, const Fr& omega, 
-                              size_t l, const KZG::SetupParams& params);
+    static pair<KZG::Commitment, KZG::Commitment> commit_phase(
+        const vector<Fr>& polynomial, const Fr& omega, size_t l, 
+        const KZG::SetupParams& params);
     
-    // Verify a SumCheck proof using pairing-based verification
-    static bool verify(const SumCheckProof& proof, const Fr& omega, 
-                      size_t l, const KZG::SetupParams& params);
+    static SumCheckProof prove(const vector<Fr>& polynomial, 
+                              const Fr& challenge, const Fr& omega, size_t l,
+                              const KZG::SetupParams& params);
     
-    // Enhanced verification with additional cryptographic checks
+    static bool verify(const SumCheckProof& proof, const Fr& omega, size_t l,
+                      const KZG::SetupParams& params);
+    
     static bool verify_with_full_checks(const SumCheckProof& proof, const Fr& omega, 
                                        size_t l, const KZG::SetupParams& params);
-
-private:
-    // For debugging/testing
-    static vector<Fr> compute_quotient_by_x(const vector<Fr>& polynomial);
-    static bool verify_primitive_root(const Fr& omega, size_t l);
 };

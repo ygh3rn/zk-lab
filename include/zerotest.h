@@ -8,27 +8,28 @@ using namespace mcl;
 using namespace std;
 
 struct ZeroTestProof {
-    KZG::Commitment commitment;
-    KZG::Proof quotient_proof;
+    KZG::Commitment f_commitment;
+    KZG::Commitment q_commitment;
+    Fr challenge;
+    KZG::Proof f_eval_proof;
+    KZG::Proof q_eval_proof;
+    Fr f_eval;
+    Fr q_eval;
 };
 
 class ZeroTest {
 public:
-    // Generate a ZeroTest proof
-    static ZeroTestProof prove(const vector<Fr>& polynomial, const Fr& omega, 
-                              size_t l, const KZG::SetupParams& params);
+    static pair<KZG::Commitment, KZG::Commitment> commit_phase(
+        const vector<Fr>& polynomial, const Fr& omega, size_t l, 
+        const KZG::SetupParams& params);
     
-    // Verify a ZeroTest proof using pairing-based verification
-    static bool verify(const ZeroTestProof& proof, const Fr& omega, 
-                      size_t l, const KZG::SetupParams& params);
+    static ZeroTestProof prove(const vector<Fr>& polynomial, 
+                              const Fr& challenge, const Fr& omega, size_t l,
+                              const KZG::SetupParams& params);
     
-    // Enhanced verification with additional cryptographic checks
+    static bool verify(const ZeroTestProof& proof, const Fr& omega, size_t l,
+                      const KZG::SetupParams& params);
+    
     static bool verify_with_full_checks(const ZeroTestProof& proof, const Fr& omega, 
                                        size_t l, const KZG::SetupParams& params);
-
-private:
-    // For debugging/testing
-    static bool verify_division(const vector<Fr>& dividend, 
-                               const vector<Fr>& divisor,
-                               const vector<Fr>& quotient);
 };
