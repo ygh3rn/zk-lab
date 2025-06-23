@@ -82,6 +82,7 @@ public:
         cout << "\nPerformance Benchmarks" << endl;
         cout << "-----------------------" << endl;
         benchmark_interactive_protocols(params);
+        test_kzg_batch_vs_individual_performance(params);
         
         cout << "\nFinal Results" << endl;
         cout << "===============" << endl;
@@ -175,6 +176,36 @@ private:
         }
         
         test("KZG Protocol", correctness);
+    }
+
+    void test_kzg_batch_vs_individual_performance(const KZG::SetupParams& params) {
+        vector<Fr> polynomial = Polynomial::random(64);
+        KZG::Commitment commitment = KZG::Commit(polynomial, params);
+        
+        vector<Fr> eval_points;
+        for (size_t i = 0; i < 20; i++) {
+            eval_points.push_back(Fr(i + 1));
+        }
+        
+        auto start = high_resolution_clock::now();
+        for (const Fr& point : eval_points) {
+            KZG::Proof proof = KZG::CreateWitness(polynomial, point, params);
+            KZG::VerifyEval(commitment, point, proof, params);
+        }
+        auto individual_time = duration_cast<microseconds>(high_resolution_clock::now() - start);
+        
+        start = high_resolution_clock::now();
+        KZG::BatchProof batch_proof = KZG::CreateWitnessBatch(polynomial, eval_points, params);
+        bool batch_valid = KZG::VerifyEvalBatch(commitment, batch_proof, params);
+        auto batch_time = duration_cast<microseconds>(high_resolution_clock::now() - start);
+        
+        double speedup = static_cast<double>(individual_time.count()) / batch_time.count();
+        
+        cout << "Individual 20x: " << individual_time.count() << "μs" << endl;
+        cout << "Batch 1x: " << batch_time.count() << "μs" << endl;
+        cout << "Speedup: " << speedup << "x" << endl;
+        
+        test("KZG Batch Performance", batch_valid && speedup > 0);
     }
     
     void test_zerotest_interactive(const KZG::SetupParams& params) {
