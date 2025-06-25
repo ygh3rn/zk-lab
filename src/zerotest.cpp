@@ -2,29 +2,29 @@
 #include "polynomial.h"
 #include <stdexcept>
 
-std::pair<KZG::Commitment, KZG::Commitment> ZeroTest::commit_phase(
-    const std::vector<Fr>& polynomial, const Fr& omega, size_t l, 
+pair<KZG::Commitment, KZG::Commitment> ZeroTest::commit_phase(
+    const vector<Fr>& polynomial, const Fr& omega, size_t l, 
     const KZG::SetupParams& params) {
     
     Fr omega_power = Fr(1);
     for (size_t i = 0; i < l; i++) {
         Fr eval = Polynomial::evaluate(polynomial, omega_power);
         if (!eval.isZero()) {
-            throw std::invalid_argument("Polynomial does not vanish at ω^" + std::to_string(i));
+            throw invalid_argument("Polynomial does not vanish at ω^" + to_string(i));
         }
         Fr::mul(omega_power, omega_power, omega);
     }
     
-    std::vector<Fr> vanishing_poly = Polynomial::vanishing(l);
-    std::vector<Fr> quotient = Polynomial::divide(polynomial, vanishing_poly);
+    vector<Fr> vanishing_poly = Polynomial::vanishing(l);
+    vector<Fr> quotient = Polynomial::divide(polynomial, vanishing_poly);
     
-    std::vector<Fr> product = Polynomial::multiply(quotient, vanishing_poly);
+    vector<Fr> product = Polynomial::multiply(quotient, vanishing_poly);
     if (product.size() != polynomial.size()) {
-        throw std::runtime_error("Polynomial division has non-zero remainder");
+        throw runtime_error("Polynomial division has non-zero remainder");
     }
     for (size_t i = 0; i < polynomial.size(); i++) {
         if (!(polynomial[i] == product[i])) {
-            throw std::runtime_error("Polynomial division has non-zero remainder");
+            throw runtime_error("Polynomial division has non-zero remainder");
         }
     }
     
@@ -34,7 +34,7 @@ std::pair<KZG::Commitment, KZG::Commitment> ZeroTest::commit_phase(
     return {f_commit, q_commit};
 }
 
-ZeroTestProof ZeroTest::prove(const std::vector<Fr>& polynomial, 
+ZeroTestProof ZeroTest::prove(const vector<Fr>& polynomial, 
                              const Fr& challenge, const Fr& omega, size_t l,
                              const KZG::SetupParams& params) {
     ZeroTestProof proof;
@@ -44,8 +44,8 @@ ZeroTestProof ZeroTest::prove(const std::vector<Fr>& polynomial,
     proof.q_commitment = q_commit;
     proof.challenge = challenge;
     
-    std::vector<Fr> vanishing_poly = Polynomial::vanishing(l);
-    std::vector<Fr> quotient = Polynomial::divide(polynomial, vanishing_poly);
+    vector<Fr> vanishing_poly = Polynomial::vanishing(l);
+    vector<Fr> quotient = Polynomial::divide(polynomial, vanishing_poly);
     
     proof.f_eval = Polynomial::evaluate(polynomial, challenge);
     proof.q_eval = Polynomial::evaluate(quotient, challenge);

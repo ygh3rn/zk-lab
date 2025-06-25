@@ -2,10 +2,6 @@
 #include "polynomial.h"
 #include <stdexcept>
 
-#include "sumcheck.h"
-#include "polynomial.h"
-#include <stdexcept>
-
 pair<KZG::Commitment, KZG::Commitment> SumCheck::commit_phase(
     const vector<Fr>& polynomial, const Fr& omega, size_t l, 
     const KZG::SetupParams& params) {
