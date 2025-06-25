@@ -1,72 +1,143 @@
 # Cryptographic Protocol Implementation
 
-A mathematically rigorous implementation of fundamental cryptographic protocols including polynomial commitments, Number Theoretic Transforms, and zero-knowledge Polynomial Interactive Oracle Proofs (PIOPs).
+**Week 6 (16/6 -- 22/6) - Programming Lab**
 
-## Security & Mathematical Rigor
+A mathematically rigorous implementation of fundamental cryptographic protocols including Number Theoretic Transforms, polynomial commitments, and zero-knowledge Polynomial Interactive Oracle Proofs (PIOPs).
 
-This implementation prioritizes cryptographic soundness and mathematical correctness. All protocols include:
+## Number Theoretic Transform (NTT)
 
-- Formal security proofs in code comments
-- Complete error handling with meaningful exceptions
-- Input validation and bounds checking
-- Production-ready verification with enhanced security checks
-- Comprehensive testing against known attack vectors
+The Number Theoretic Transform is the finite field analogue of the Fast Fourier Transform, enabling efficient polynomial operations over finite fields.
 
-## Features
+### Mathematical Foundation
 
-### Core Cryptographic Primitives
+For prime _p_ and primitive _n_-th root of unity _ω_ where _n_ | (_p_-1):
 
-#### 1. Number Theoretic Transform (NTT)
-- Non-recursive implementation with optimized bit-reversal
-- Mathematically verified primitive root finding for arbitrary field orders
-- Time complexity: O(n log n) with minimal constant factors
-- Applications: Fast polynomial multiplication, interpolation, evaluation
+- **Forward NTT:** For polynomial _f(x)_ = ∑ᵢ₌₀ⁿ⁻¹ _aᵢ xⁱ_:
 
-#### 2. KZG Polynomial Commitment Scheme
-- Trusted setup with structured reference string generation
-- Constant-size commitments (~32 bytes) for arbitrary degree polynomials
-- Succinct evaluation proofs (~64 bytes) with pairing-based verification
-- Knowledge soundness under the q-SDH assumption in bilinear groups
+<img src="https://latex.codecogs.com/svg.latex?\hat{f}_j%20=%20\sum_{i=0}^{n-1}%20a_i%20\omega^{ij}%20\bmod%20p%20\quad%20\text{for%20}%20j%20=%200,%20\ldots,%20n-1" />
 
-#### 3. Univariate ZeroTest PIOP
-**Relation**: `R_UniZT = {(C ∈ 𝔾; f(X) ∈ 𝔽[X]) : C = PCS(f) ∧ ∀i ∈ [0,l), f(ωⁱ) = 0}`
+- **Inverse NTT:** Reconstruction using _ω⁻¹_:
 
-- Mathematical foundation: Proves polynomial divisibility by vanishing polynomial Z_H(x) = x^l - 1
-- Verification equation: e(C_f, g₂) = e(C_q, Z_H(τ)·g₂) using optimal ate pairing
-- Security: Knowledge soundness assuming KZG binding and discrete log hardness
+<img src="https://latex.codecogs.com/svg.latex?a_i%20=%20n^{-1}%20\sum_{j=0}^{n-1}%20\hat{f}_j%20(\omega^{-1})^{ij}%20\bmod%20p" />
 
-#### 4. Univariate SumCheck PIOP  
-**Relation**: `R_UniSC = {(C ∈ 𝔾; f(X) ∈ 𝔽[X]) : C = PCS(f) ∧ ∑ᵢ₌₀ˡ⁻¹ f(ωⁱ) = 0}`
+### Implementation Details
 
-- Mathematical foundation: ∑f(ωⁱ) = l × [constant term of f(x) mod (x^l - 1)]
-- Divisibility proof: Shows remainder r(x) = f(x) mod (x^l - 1) has r(x) = x·q(x)
-- Pairing verification: e(C_f, g₂) = e(C_q, τ·g₂) for quotient witness
+Non-recursive implementation using bit-reversal permutation for optimal cache performance. Polynomial interpolation achieved through inverse NTT of evaluation points.
 
-## Technical Specifications
+## Polynomial Multiplication via NTT
 
-### Cryptographic Parameters
-- **Elliptic Curve**: BN_SNARK1 (254-bit prime order)
-- **Security Level**: ~128 bits (suitable for production)
-- **Pairing Type**: Optimal ate pairing over BN curves
-- **Field Arithmetic**: Montgomery ladder with constant-time operations
+Efficient multiplication using convolution theorem in finite fields.
 
-### Performance Characteristics
+### Algorithm
 
-| Operation | Time Complexity | Space Complexity | Proof Size |
-|-----------|----------------|------------------|------------|
-| NTT/INTT | O(n log n) | O(n) | N/A |
-| KZG Setup | O(n)𝔾 | O(n) | O(n) SRS |
-| KZG Commit | O(n)𝔾 | O(1) | 32 bytes |
-| KZG Prove | O(n)𝔽 | O(n) | 64 bytes |
-| KZG Verify | O(1)ₚ | O(1) | N/A |
-| ZeroTest Prove | O(D)𝔾 + O(D)𝔽 | O(D) | 64 bytes |
-| ZeroTest Verify | O(1)𝔾 + O(1)ₚ | O(1) | N/A |
-| SumCheck Prove | O(D)𝔾 + O(D)𝔽 | O(D) | 64 bytes |
-| SumCheck Verify | O(1)𝔾 + O(1)ₚ | O(1) | N/A |
+For polynomials _f(x)_, _g(x)_ of degree less than _n_:
 
-*Legend: 𝔾 = group operation, 𝔽 = field operation, ₚ = pairing, D = polynomial degree*
+1. Pad to size 2_n_ and compute NTT(_f_), NTT(_g_)
+2. Pointwise multiplication: NTT(_h_)[_i_] = NTT(_f_)[_i_] · NTT(_g_)[_i_]
+3. Inverse transform: _h(x)_ = INTT(NTT(_h_))
 
-## Architecture
+### Complexity Analysis
+
+- **Time complexity:** _O(n log n)_ versus naive _O(n²)_
+- **Space complexity:** _O(n)_ field elements
+
+## KZG Polynomial Commitment Scheme
+
+Implementation of the Kate-Zaverucha-Goldberg commitment scheme for univariate polynomials.
+
+### Interface
+
+- **Setup**(1^λ, _d_) → SRS: Generate (_g_, _g^τ_, _g^τ²_, ..., _g^τᵈ_)
+- **Commit**(_f(x)_) → _c_: Compute _c_ = _g^f(τ)_
+- **CreateWitness**(_f(x)_, _z_) → _π_: Generate _π_ = _g^w(τ)_ where _w(x)_ = (_f(x)_ - _f(z)_)/(_x_ - _z_)
+- **VerifyEval**(_c_, _z_, _v_, _π_) → {0,1}: Check _e(c · g^(-v), g)_ = _e(π, g^τ · g^(-z))_
+
+### Security Properties
+
+- **Binding:** Under _d_-Strong Diffie-Hellman assumption
+- **Succinctness:** Constant proof size independent of polynomial degree
+
+## Univariate ZeroTest PIOP
+
+A PIOP proving that polynomial _f(x)_ evaluates to zero everywhere on subgroup 𝐇_ℓ.
+
+### Relation
+
+<img src="https://latex.codecogs.com/svg.latex?\mathcal{R}_{\text{UniZT}}%20=%20\{(C%20\in%20\mathbb{G};%20f(X)%20\in%20\mathbb{F}_p[X])%20:%20C%20=%20\text{PCS}(f)%20\land%20\forall%20i%20\in%20[0,\ell),%20f(\omega_\ell^i)%20=%200\}" />
+
+### Protocol Description
+
+**Key insight:** _f(x)_ = 0 on 𝐇_ℓ ⟺ Z₍𝐇_ℓ₎(_x_) | _f(x)_ where Z₍𝐇_ℓ₎(_x_) = ∏ᵢ₌₀^(ℓ-1)(_x_ - ωₗⁱ).
+
+1. **Prover:** Compute quotient _q(x)_ = _f(x)_/Z₍𝐇_ℓ₎(_x_) and send _Cᵩ_ = PCS(_q_)
+2. **Verifier:** Send random challenge _r_ ∈ 𝔽_p
+3. **Prover:** Open _f(r)_ and _q(r)_ with respective proofs
+4. **Verifier:** Check _f(r)_ = _q(r)_ · Z₍𝐇_ℓ₎(_r_) and verify opening proofs
+
+### Complexity Analysis
+
+- **Prover time:** _O(D)_𝔾 + _O(D)_𝔽
+- **Verifier time:** _O(1)_𝔾 + _O(1)_𝔽
+- **Proof size:** _O(1)_
+
+## Univariate SumCheck PIOP
+
+A PIOP proving that polynomial evaluations sum to zero over subgroup 𝐇_ℓ.
+
+### Relation
+
+<img src="https://latex.codecogs.com/svg.latex?\mathcal{R}_{\text{UniSC}}%20=%20\left\{(C%20\in%20\mathbb{G};%20f(X)%20\in%20\mathbb{F}_p[X])%20:%20C%20=%20\text{PCS}(f)%20\land%20\sum_{i=0}^{\ell-1}%20f(\omega_\ell^i)%20=%200\right\}" />
+
+### Protocol Description
+
+**Key insight:** For polynomial _g(x)_ of degree < ℓ: ∑_(a ∈ 𝐇_ℓ) _g(a)_ = _g(0)_ · ℓ.
+
+Therefore, ∑_(a ∈ 𝐇_ℓ) _f(a)_ = 0 ⟺ ∃ _h*_(x), _t(x)_ such that:
+
+<img src="https://latex.codecogs.com/svg.latex?f(x)%20=%20h^*(x)%20\cdot%20Z_{\mathbb{H}_\ell}(x)%20+%20x%20\cdot%20t(x)" />
+
+where deg(_t_) < ℓ - 1.
+
+1. **Prover:** Compute _h*_(x) and _t(x)_, send _C_{h*}_ = PCS(_h*_) and _Cₜ_ = PCS(_t_)
+2. **Verifier:** Send random challenge _r_ ∈ 𝔽_p
+3. **Prover:** Open _f(r)_, _h*_(r), and _t(r)_ with respective proofs
+4. **Verifier:** Check _f(r)_ = _h*_(r) · Z₍𝐇_ℓ₎(_r_) + _r_ · _t(r)_ and verify opening proofs
+
+### Complexity Analysis
+
+- **Prover time:** _O(D)_𝔾 + _O(D)_𝔽
+- **Verifier time:** _O(1)_𝔾 + _O(1)_𝔽
+- **Proof size:** _O(1)_
+
+## Getting Started
+
+### Prerequisites
+
+```bash
+# Install MCL cryptographic library
+git clone https://github.com/herumi/mcl.git
+cd mcl && make -j$(nproc) && sudo make install
+
+# System requirements
+sudo apt update && sudo apt install -y cmake g++ libomp-dev
+```
+
+### Compilation
+
+```bash
+# Clone and build
+git clone <your-repo-url>
+cd cryptography-implementation
+
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make -j$(nproc)
+
+# Run comprehensive test suite
+./test_suite
+```
+
+### Project Structure
 
 ```
 include/
@@ -87,35 +158,14 @@ tests/
 └── test_suite.cpp     # Comprehensive test suite with attack vectors
 ```
 
-## Getting Started
+## Implementation Notes
 
-### Prerequisites
+- **Library:** Used mcl library with BN_SNARK1 curve for cryptographic operations
+- **Testing:** Generated random polynomials and verified against mathematical properties
+- **Security:** All protocols include formal verification and security proofs
+- **Performance:** Optimized implementations with complexity analysis
 
-```bash
-# Install MCL cryptographic library
-git clone https://github.com/herumi/mcl.git
-cd mcl && make -j$(nproc) && sudo make install
-
-# System requirements
-sudo apt update && sudo apt install -y cmake g++ libomp-dev
-```
-
-### Compilation
-
-```bash
-# Clone and build
-git clone https://github.com/yourusername/cryptography-implementation.git
-cd cryptography-implementation
-
-mkdir build && cd build
-cmake -DCMAKE_BUILD_TYPE=Release ..
-make -j$(nproc)
-
-# Run comprehensive test suite
-./test_suite
-```
-
-### Basic Usage
+## Usage Example
 
 ```cpp
 #include <mcl/bn.hpp>
@@ -137,89 +187,13 @@ KZG::Commitment commit = KZG::Commit(poly, params);
 Fr point = Fr(42);
 KZG::Proof proof = KZG::CreateWitness(poly, point, params);
 bool valid = KZG::VerifyEval(commit, point, proof, params);
-
-// ZeroTest PIOP for vanishing polynomials
-Fr omega = NTT::find_primitive_root(8);
-std::vector<Fr> vanishing_poly = Polynomial::vanishing(8);
-ZeroTestProof zero_proof = ZeroTest::prove(vanishing_poly, omega, 8, params);
-bool zero_valid = ZeroTest::verify_with_full_checks(zero_proof, omega, 8, params);
 ```
-
-## Testing & Verification
-
-### Automated Test Suite
-
-```bash
-# Run all tests with performance benchmarks
-./test_suite
-
-# Expected output:
-# NTT Implementation - correctness and timing
-# Polynomial Operations - multiplication, division, interpolation  
-# KZG Protocol - setup, commit, prove, verify
-# ZeroTest PIOP - vanishing polynomial proofs
-# SumCheck PIOP - sum-zero polynomial proofs
-# Security Properties - completeness, soundness, binding
-```
-
-### Security Testing
-
-The implementation includes tests for:
-- **Completeness**: Honest provers always convince honest verifiers
-- **Soundness**: Malicious provers cannot convince honest verifiers  
-- **Binding**: Commitments cannot be opened to different values
-- **Knowledge soundness**: Accepting provers can extract valid witnesses
-
-## Mathematical Background
-
-### Zero-Knowledge Polynomial IOPs
-
-PIOPs combine the efficiency of Interactive Oracle Proofs with the strong security guarantees of zero-knowledge protocols. Key properties:
-
-1. **Completeness**: If statement is true, honest prover convinces verifier
-2. **Soundness**: If statement is false, no prover convinces verifier  
-3. **Zero-Knowledge**: Verifier learns nothing beyond validity
-4. **Succinctness**: Communication is sublinear in statement size
-
-### KZG Commitments
-
-Based on the mathematical insight that polynomial evaluation can be verified using bilinear pairings:
-
-```
-e(C - v·g₁, g₂) = e(π, τ·g₂ - z·g₂)
-```
-
-Where:
-- `C = g₁^{f(τ)}` is polynomial commitment  
-- `π = g₁^{(f(τ)-v)/(τ-z)}` is evaluation proof
-- `v = f(z)` is claimed evaluation
-- Security relies on q-Strong Diffie-Hellman assumption
-
-## Security Considerations
-
-### Cryptographic Assumptions
-- **q-Strong Diffie-Hellman**: For KZG binding
-- **Discrete Logarithm**: For commitment hiding  
-- **Bilinear Diffie-Hellman**: For pairing security
-- **Random Oracle Model**: For Fiat-Shamir transformation
-
-### Implementation Security
-- **Constant-time operations** prevent timing attacks
-- **Input validation** prevents malformed data attacks
-- **Memory safety** with RAII and bounds checking
-- **Side-channel resistance** with uniform execution paths
-
-### Trusted Setup
-- KZG requires one-time trusted setup with toxic waste disposal
-- Setup ceremony must be performed securely with multiple parties
-- Public parameters can be reused across different applications
-- Verification of setup correctness using mathematical properties
 
 ## References
 
-1. **[KZG10]** Kate, A., Zaverucha, G. M., & Goldberg, I. (2010). *Constant-size commitments to polynomials and their applications*. ASIACRYPT 2010. Available at: https://www.iacr.org/archive/asiacrypt2010/6477178/6477178.pdf
+1. **[KZG10]** Kate, A., Zaverucha, G. M., & Goldberg, I. (2010). *Constant-size commitments to polynomials and their applications*. ASIACRYPT 2010.
 
-2. **[Thaler22]** Thaler, J. (2022). *Proofs, Arguments, and Zero-Knowledge*. Available at: https://people.cs.georgetown.edu/jthaler/ProofsArgsAndZK.pdf
+2. **[Thaler22]** Thaler, J. (2022). *Proofs, Arguments, and Zero-Knowledge*.
 
 3. **MCL Library**: https://github.com/herumi/mcl - High-performance cryptographic library
 
@@ -227,15 +201,6 @@ Where:
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-## Contributing
-
-Contributions welcome! Please ensure:
-- Mathematical correctness with formal verification
-- Comprehensive testing including edge cases
-- Security analysis for new protocols  
-- Performance benchmarks for optimizations
-- Code documentation with security proofs
-
 ---
 
-*This implementation is for educational and research purposes. For production deployment, conduct thorough security audits and formal verification.*
+*This implementation is for educational and research purposes. Mathematical rigor and security are prioritized throughout.*
