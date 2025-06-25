@@ -64,18 +64,12 @@ Fr NTT::find_primitive_root(size_t n) {
         return Fr(1);
     }
     
-    Fr exponent = Fr(-1) / Fr(n);
-    Fr half = Fr(n / 2);
-
-    for (int b = 2; ; ++b) {
-        Fr root, test;
-        Fr::pow(root, Fr(b), exponent);
-        Fr::pow(test, root, half);
-
-        if (test == Fr(-1)) {
-            return root;
-        }
+    Fr root = Fr(-1);
+    for (size_t i = 2; i < n; i *= 2) {
+        Fr::squareRoot(root, root);
     }
+
+    return root;
 }
 
 Fr NTT::mod_inverse(const Fr& a) {
