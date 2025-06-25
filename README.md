@@ -1,7 +1,5 @@
 # Cryptographic Protocol Implementation
 
-**Week 6 (16/6 -- 22/6) - Programming Lab**
-
 A mathematically rigorous implementation of fundamental cryptographic protocols including Number Theoretic Transforms, polynomial commitments, and zero-knowledge Polynomial Interactive Oracle Proofs (PIOPs).
 
 ## Number Theoretic Transform (NTT)
